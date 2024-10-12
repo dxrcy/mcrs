@@ -1,3 +1,4 @@
+mod blocks;
 mod command;
 mod connection;
 mod response;
@@ -28,19 +29,4 @@ impl Block {
     pub const fn new(id: i32, modifier: i32) -> Self {
         Self { id, modifier }
     }
-}
-
-macro_rules! blocks {
-    ( $( $name:ident = ($id:expr, $modifier:expr); )* ) => {
-        impl Block {
-            $( pub const $name: Self = Self::new($id, $modifier); )*
-        }
-    };
-}
-
-blocks! {
-    AIR = (0, 0);
-    STONE = (1, 0);
-    GRANITE = (1, 1);
-    // TODO
 }
