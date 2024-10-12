@@ -29,4 +29,9 @@ fn main() {
 
     let block = mc.get_block(player).expect("Failed to get block");
     println!("Block: {:?}", block);
+
+    let height = mc
+        .get_height(player.x, player.z)
+        .expect("Failed to get height");
+    println!("Height: {:?}", height);
 }
