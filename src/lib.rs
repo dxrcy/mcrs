@@ -36,20 +36,52 @@ impl Connection {
         self.send(format!("chat.post({})\n", sanitize_string(message)))
     }
 
+    pub fn do_command(&mut self, command: impl AsRef<str>) -> io::Result<()> {
+        self.send(format!("player.doCommand({})\n", sanitize_string(command)))
+    }
+
     pub fn set_player_position(&mut self, pos: Coordinate) -> io::Result<()> {
         self.send(format!("player.setPos({},{},{})\n", pos.x, pos.y, pos.z))
     }
 
     pub fn get_player_position(&mut self) -> io::Result<Coordinate> {
-        let command = "player.getPos()\n";
-        self.send(command)?;
+        self.send("player.getPos()\n")?;
         let response = self.recv()?;
+        let coord = coordinate_from_response(&response).expect("malformed server response");
+        Ok(coord)
+    }
 
-        let mut iter = IntegerList::from(&response);
-        let x = iter.next().expect("x");
-        let y = iter.next().expect("y");
-        let z = iter.next().expect("z");
-        Ok(Coordinate { x, y, z })
+    pub fn set_player_tile_position(&mut self, pos: Coordinate) -> io::Result<()> {
+        self.send(format!(
+            "player.setPos({},{},{})\n",
+            pos.x,
+            pos.y + 1,
+            pos.z,
+        ))
+    }
+
+    pub fn get_player_tile_position(&mut self) -> io::Result<Coordinate> {
+        self.send("player.getPos()\n")?;
+        let response = self.recv()?;
+        let coord = coordinate_from_response(&response).expect("malformed server response");
+        Ok(coord)
+    }
+
+    pub fn set_block(&mut self, location: Coordinate, block: Block) -> io::Result<()> {
+        self.send(format!(
+            "world.setBlock({},{},{},{},{})\n",
+            location.x, location.y, location.z, block.id, block.modifier,
+        ))
+    }
+
+    pub fn get_block(&mut self, location: Coordinate) -> io::Result<Block> {
+        self.send(format!(
+            "world.getBlockWithData({},{},{})\n",
+            location.x, location.y, location.z,
+        ))?;
+        let response = self.recv()?;
+        let block = block_from_response(&response).expect("malformed server response");
+        Ok(block)
     }
 }
 
@@ -63,6 +95,21 @@ fn sanitize_string(input: impl AsRef<str>) -> String {
         }
     }
     output
+}
+
+fn coordinate_from_response(line: &str) -> Option<Coordinate> {
+    let mut iter = IntegerList::from(&line);
+    let x = iter.next()?;
+    let y = iter.next()?;
+    let z = iter.next()?;
+    Some(Coordinate { x, y, z })
+}
+
+fn block_from_response(line: &str) -> Option<Block> {
+    let mut iter = IntegerList::from(&line);
+    let id = iter.next()?;
+    let modifier = iter.next()?;
+    Some(Block { id, modifier })
 }
 
 struct IntegerList<'a> {
@@ -79,7 +126,6 @@ impl<'a> IntegerList<'a> {
 
 impl Iterator for IntegerList<'_> {
     type Item = i32;
-
     fn next(&mut self) -> Option<Self::Item> {
         Some(self.inner.next()?.trim().parse::<f32>().ok()?.floor() as i32)
     }
@@ -93,7 +139,34 @@ pub struct Coordinate {
 }
 
 impl Coordinate {
-    pub fn new(x: i32, y: i32, z: i32) -> Self {
+    pub const fn new(x: i32, y: i32, z: i32) -> Self {
         Self { x, y, z }
     }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Block {
+    pub id: i32,
+    pub modifier: i32,
+}
+
+impl Block {
+    pub const fn new(id: i32, modifier: i32) -> Self {
+        Self { id, modifier }
+    }
+}
+
+macro_rules! blocks {
+    ( $( $name:ident = ($id:expr, $modifier:expr); )* ) => {
+        impl Block {
+            $( pub const $name: Self = Self::new($id, $modifier); )*
+        }
+    };
+}
+
+blocks! {
+    AIR = (0, 0);
+    STONE = (1, 0);
+    GRANITE = (1, 1);
+    // TODO
 }
