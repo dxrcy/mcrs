@@ -57,4 +57,17 @@ fn main() {
     mc.set_blocks(location_a, location_b, Block::GOLD_BLOCK)
         .expect("Failed to set blocks");
     println!("Set blocks.");
+
+    let height_map = mc
+        .get_heights(location_a, location_b)
+        .expect("Failed to get heights");
+    println!("Heights:");
+    for item in height_map.iter() {
+        println!(
+            "{} {} {}",
+            item.position_relative(),
+            item.position_absolute(),
+            item.height(),
+        );
+    }
 }

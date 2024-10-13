@@ -3,8 +3,9 @@ use std::{
     net::{TcpStream, ToSocketAddrs},
 };
 
-use crate::{command::Command, Chunk};
-use crate::{response::Response, Block, Coordinate};
+use crate::{
+    command::Command, height_map::HeightMap, response::Response, Block, Chunk, Coordinate,
+};
 
 type Result<T> = io::Result<T>;
 
@@ -110,5 +111,17 @@ impl Connection {
         Ok(height)
     }
 
-    // TODO(feat): get_heights
+    pub fn get_heights(&mut self, a: Coordinate, b: Coordinate) -> Result<HeightMap> {
+        self.send(
+            Command::new("world.getHeights")
+                .arg_int(a.x)
+                .arg_int(a.z)
+                .arg_int(b.x)
+                .arg_int(b.z),
+        )?;
+        let response = self.recv()?;
+        let list = response.as_integer_list();
+        let height_map = HeightMap::new(a, b, list);
+        Ok(height_map)
+    }
 }

@@ -3,6 +3,7 @@ mod chunk;
 mod command;
 mod connection;
 mod coordinate;
+mod height_map;
 mod response;
 
 pub use block::Block;

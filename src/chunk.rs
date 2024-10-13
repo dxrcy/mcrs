@@ -47,6 +47,31 @@ impl Chunk {
     }
 }
 
+impl ChunkSize {
+    pub fn index_to_coordinate(&self, index: usize) -> Coordinate {
+        let z = (index % self.z as usize) as i32;
+        let xy = index / self.z as usize;
+        let x = (xy % self.x as usize) as i32;
+        let y = (xy / self.x as usize) as i32;
+        Coordinate { x, y, z }
+    }
+
+    pub fn coordinate_to_index(&self, coordinate: Coordinate) -> usize {
+        let [x, y, z] = [
+            coordinate.x as usize,
+            coordinate.y as usize,
+            coordinate.z as usize,
+        ];
+        z + (x + y * self.x as usize) * self.z as usize
+    }
+
+    pub fn contains(&self, coordinate: Coordinate) -> bool {
+        (0..self.x as i32).contains(&coordinate.x)
+            && (0..self.y as i32).contains(&coordinate.y)
+            && (0..self.z as i32).contains(&coordinate.z)
+    }
+}
+
 pub struct ChunkIter<'a> {
     chunk: &'a Chunk,
     index: usize,
@@ -98,30 +123,5 @@ impl<'a> ChunkItem<'a> {
     }
     pub fn position_absolute(&self) -> Coordinate {
         self.position_relative() + self.chunk.origin
-    }
-}
-
-impl ChunkSize {
-    pub fn index_to_coordinate(&self, index: usize) -> Coordinate {
-        let z = (index % self.z as usize) as i32;
-        let xy = index / self.z as usize;
-        let x = (xy % self.x as usize) as i32;
-        let y = (xy / self.x as usize) as i32;
-        Coordinate { x, y, z }
-    }
-
-    pub fn coordinate_to_index(&self, coordinate: Coordinate) -> usize {
-        let [x, y, z] = [
-            coordinate.x as usize,
-            coordinate.y as usize,
-            coordinate.z as usize,
-        ];
-        z + (x + y * self.x as usize) * self.z as usize
-    }
-
-    pub fn contains(&self, coordinate: Coordinate) -> bool {
-        (0..self.x as i32).contains(&coordinate.x)
-            && (0..self.y as i32).contains(&coordinate.y)
-            && (0..self.z as i32).contains(&coordinate.z)
     }
 }

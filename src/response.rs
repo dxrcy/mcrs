@@ -24,6 +24,10 @@ impl Response {
         parse_block(&self.response)
     }
 
+    pub fn as_integer_list(&self) -> Vec<i32> {
+        IntegerList::from(&self.response).collect()
+    }
+
     pub fn as_block_list(&self) -> Option<Vec<Block>> {
         let mut list = Vec::new();
         for item in self.response.split(';') {
