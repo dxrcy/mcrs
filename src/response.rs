@@ -2,6 +2,7 @@ use std::str::Split;
 
 use crate::{Block, Coordinate};
 
+#[derive(Debug)]
 pub struct Response {
     response: String,
 }
@@ -16,19 +17,42 @@ impl Response {
     }
 
     pub fn as_coordinate(self) -> Option<Coordinate> {
-        let mut iter = IntegerList::from(&self.response);
-        let x = iter.next()?;
-        let y = iter.next()?;
-        let z = iter.next()?;
-        Some(Coordinate { x, y, z })
+        parse_coord(&self.response)
     }
 
     pub fn as_block(self) -> Option<Block> {
-        let mut iter = IntegerList::from(&self.response);
-        let id = iter.next()?;
-        let modifier = iter.next()?;
-        Some(Block { id, modifier })
+        parse_block(&self.response)
     }
+
+    pub fn as_block_list(self) -> Option<Vec<Block>> {
+        let mut list = Vec::new();
+        for item in self.response.split(";") {
+            let block = parse_block(item)?;
+            list.push(block);
+        }
+        Some(list)
+    }
+}
+
+fn parse_coord(item: &str) -> Option<Coordinate> {
+    let mut iter = IntegerList::from(item);
+    let x = iter.next()?;
+    let y = iter.next()?;
+    let z = iter.next()?;
+    if iter.next().is_some() {
+        return None;
+    }
+    Some(Coordinate { x, y, z })
+}
+
+fn parse_block(item: &str) -> Option<Block> {
+    let mut iter = IntegerList::from(item);
+    let id = iter.next()?;
+    let modifier = iter.next()?;
+    if iter.next().is_some() {
+        return None;
+    }
+    Some(Block { id, modifier })
 }
 
 struct IntegerList<'a> {
@@ -45,7 +69,10 @@ impl<'a> IntegerList<'a> {
 
 impl Iterator for IntegerList<'_> {
     type Item = i32;
+
     fn next(&mut self) -> Option<Self::Item> {
-        Some(self.inner.next()?.trim().parse::<f32>().ok()?.floor() as i32)
+        let item = self.inner.next()?;
+        let float: f32 = item.trim().parse().ok()?;
+        Some(float.floor() as i32)
     }
 }

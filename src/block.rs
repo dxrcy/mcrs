@@ -1,9 +1,39 @@
-use crate::Block;
+use std::fmt;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Block {
+    pub id: i32,
+    pub modifier: i32,
+}
+
+impl Block {
+    pub const fn new(id: i32, modifier: i32) -> Self {
+        Self { id, modifier }
+    }
+}
+
+impl fmt::Display for Block {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.get_name() {
+            Some(name) => write!(f, "{}", name)?,
+            None => write!(f, "[UNKNOWN]")?,
+        }
+        write!(f, " ({}:{})", self.id, self.modifier)?;
+        Ok(())
+    }
+}
 
 macro_rules! blocks {
     ( $( $name:ident = ($id:expr, $modifier:expr); )* ) => {
         impl Block {
             $( pub const $name: Self = Self::new($id, $modifier); )*
+
+            pub fn get_name(&self) -> Option<&'static str> {
+                match (self.id, self.modifier) {
+                    $( ($id, $modifier) => Some(stringify!($name)), )*
+                    _ => None,
+                }
+            }
         }
     };
 }

@@ -1,3 +1,6 @@
+use crate::{Block, Coordinate};
+
+#[derive(Debug)]
 pub struct Command {
     command: String,
     arg_count: usize,
@@ -16,13 +19,29 @@ impl Command {
         }
     }
 
-    pub fn arg(mut self, arg: impl Arg) -> Self {
+    fn arg(mut self, arg: impl Arg) -> Self {
         if self.arg_count > 0 {
             self.command += ",";
         }
         arg.push_to_command(&mut self.command);
         self.arg_count += 1;
         self
+    }
+
+    pub fn arg_int(self, int: i32) -> Self {
+        self.arg(int)
+    }
+
+    pub fn arg_string(self, string: impl AsRef<str>) -> Self {
+        self.arg(string.as_ref())
+    }
+
+    pub fn arg_coordinate(self, coordinate: Coordinate) -> Self {
+        self.arg(coordinate.x).arg(coordinate.y).arg(coordinate.z)
+    }
+
+    pub fn arg_block(self, block: Block) -> Self {
+        self.arg(block.id).arg(block.modifier)
     }
 
     pub fn build(self) -> String {
