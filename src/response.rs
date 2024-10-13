@@ -12,21 +12,21 @@ impl Response {
         Self { response }
     }
 
-    pub fn as_integer(self) -> Option<i32> {
+    pub fn as_integer(&self) -> Option<i32> {
         self.response.trim().parse().ok()
     }
 
-    pub fn as_coordinate(self) -> Option<Coordinate> {
+    pub fn as_coordinate(&self) -> Option<Coordinate> {
         parse_coord(&self.response)
     }
 
-    pub fn as_block(self) -> Option<Block> {
+    pub fn as_block(&self) -> Option<Block> {
         parse_block(&self.response)
     }
 
-    pub fn as_block_list(self) -> Option<Vec<Block>> {
+    pub fn as_block_list(&self) -> Option<Vec<Block>> {
         let mut list = Vec::new();
-        for item in self.response.split(";") {
+        for item in self.response.split(';') {
             let block = parse_block(item)?;
             list.push(block);
         }

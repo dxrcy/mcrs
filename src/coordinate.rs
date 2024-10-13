@@ -25,9 +25,9 @@ impl Coordinate {
 
     pub(crate) fn size_between(self, other: Self) -> ChunkSize {
         ChunkSize {
-            x: (self.x - other.x).abs() as u32 + 1,
-            y: (self.y - other.y).abs() as u32 + 1,
-            z: (self.z - other.z).abs() as u32 + 1,
+            x: (self.x - other.x).unsigned_abs() + 1,
+            y: (self.y - other.y).unsigned_abs() + 1,
+            z: (self.z - other.z).unsigned_abs() + 1,
         }
     }
 }

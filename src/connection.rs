@@ -3,7 +3,7 @@ use std::{
     net::{TcpStream, ToSocketAddrs},
 };
 
-use crate::{command::Command, Arg, Chunk};
+use crate::{command::Command, Chunk};
 use crate::{response::Response, Block, Coordinate};
 
 type Result<T> = io::Result<T>;
@@ -26,7 +26,7 @@ impl Connection {
     }
 
     fn send(&mut self, command: Command) -> Result<()> {
-        self.stream.write(command.build().as_bytes())?;
+        self.stream.write_all(command.build().as_bytes())?;
         Ok(())
     }
 

@@ -72,12 +72,12 @@ impl Arg for i32 {
 }
 
 fn is_valid_command_name(name: &str) -> bool {
-    if name.len() < 1 {
+    if name.is_empty() {
         return false;
     }
     let mut last = '\0';
     for (i, ch) in name.chars().enumerate() {
-        if !matches!(ch, 'a'..='z'|'A'..='Z'|'.') {
+        if !matches!(ch, 'a'..='z' | 'A'..='Z' | '.') {
             return false;
         }
         if i == 0 && ch == '.' {
