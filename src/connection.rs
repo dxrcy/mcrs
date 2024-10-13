@@ -82,23 +82,24 @@ impl Connection {
         Ok(block)
     }
 
-    // TODO(feat): set_blocks
+    pub fn set_blocks(&mut self, a: Coordinate, b: Coordinate, block: Block) -> Result<()> {
+        self.send(
+            Command::new("world.setBlocks")
+                .arg_coordinate(a)
+                .arg_coordinate(b)
+                .arg_block(block),
+        )
+    }
 
-    pub fn get_blocks(&mut self, location_a: Coordinate, location_b: Coordinate) -> Result<Chunk> {
+    pub fn get_blocks(&mut self, a: Coordinate, b: Coordinate) -> Result<Chunk> {
         self.send(
             Command::new("world.getBlocksWithData")
-                .arg_coordinate(location_a)
-                .arg_coordinate(location_b),
+                .arg_coordinate(a)
+                .arg_coordinate(b),
         )?;
         let response = self.recv()?;
-        println!("{:?}", response);
         let list = response.as_block_list().expect("malformed server response");
-        println!("{:?}", list.len());
-        println!("{:?}", list);
-        for block in &list {
-            println!("{}", block);
-        }
-        let chunk = Chunk::new(location_a, location_b, list);
+        let chunk = Chunk::new(a, b, list);
         Ok(chunk)
     }
 

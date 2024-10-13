@@ -50,4 +50,11 @@ fn main() {
             item.block(),
         );
     }
+
+    let location_a = Coordinate::new(297, 67, 167);
+    let location_b = Coordinate::new(298, 69, 166);
+
+    mc.set_blocks(location_a, location_b, Block::GOLD_BLOCK)
+        .expect("Failed to set blocks");
+    println!("Set blocks.");
 }
