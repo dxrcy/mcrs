@@ -49,7 +49,7 @@ impl Command {
     }
 }
 
-pub trait Arg {
+trait Arg {
     fn push_to_command(self, command: &mut String);
 }
 

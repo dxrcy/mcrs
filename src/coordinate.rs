@@ -1,6 +1,6 @@
 use std::{fmt, ops};
 
-use crate::chunk::ChunkSize;
+use crate::chunk::Size;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Coordinate {
@@ -23,8 +23,8 @@ impl Coordinate {
         }
     }
 
-    pub(crate) fn size_between(self, other: Self) -> ChunkSize {
-        ChunkSize {
+    pub(crate) fn size_between(self, other: Self) -> Size {
+        Size {
             x: (self.x - other.x).unsigned_abs() + 1,
             y: (self.y - other.y).unsigned_abs() + 1,
             z: (self.z - other.z).unsigned_abs() + 1,

@@ -4,11 +4,11 @@ use crate::{Block, Coordinate};
 pub struct Chunk {
     list: Vec<Block>,
     origin: Coordinate,
-    size: ChunkSize,
+    size: Size,
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct ChunkSize {
+pub struct Size {
     pub x: u32,
     pub y: u32,
     pub z: u32,
@@ -38,16 +38,16 @@ impl Chunk {
     pub fn origin(&self) -> Coordinate {
         self.origin
     }
-    pub fn size(&self) -> ChunkSize {
+    pub fn size(&self) -> Size {
         self.size
     }
 
-    pub fn iter(&self) -> ChunkIter {
-        ChunkIter::from(self)
+    pub fn iter(&self) -> Iter {
+        Iter::from(self)
     }
 }
 
-impl ChunkSize {
+impl Size {
     pub fn index_to_coordinate(&self, index: usize) -> Coordinate {
         let z = (index % self.z as usize) as i32;
         let xy = index / self.z as usize;
@@ -72,24 +72,24 @@ impl ChunkSize {
     }
 }
 
-pub struct ChunkIter<'a> {
+pub struct Iter<'a> {
     chunk: &'a Chunk,
     index: usize,
 }
 
-pub struct ChunkItem<'a> {
+pub struct IterItem<'a> {
     chunk: &'a Chunk,
     index: usize,
 }
 
-impl<'a> ChunkIter<'a> {
+impl<'a> Iter<'a> {
     pub fn from(chunk: &'a Chunk) -> Self {
         Self { chunk, index: 0 }
     }
 }
 
-impl<'a> Iterator for ChunkIter<'a> {
-    type Item = ChunkItem<'a>;
+impl<'a> Iterator for Iter<'a> {
+    type Item = IterItem<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.index >= self.chunk.list.len() {
@@ -97,7 +97,7 @@ impl<'a> Iterator for ChunkIter<'a> {
         }
         let index = self.index;
         self.index += 1;
-        let item = ChunkItem {
+        let item = IterItem {
             chunk: self.chunk,
             index,
         };
@@ -105,7 +105,7 @@ impl<'a> Iterator for ChunkIter<'a> {
     }
 }
 
-impl<'a> ChunkItem<'a> {
+impl<'a> IterItem<'a> {
     pub fn chunk(&self) -> &'a Chunk {
         self.chunk
     }

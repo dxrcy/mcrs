@@ -1,14 +1,14 @@
-use crate::{chunk::ChunkSize, Coordinate};
+use crate::{chunk, Coordinate};
 
 #[derive(Clone, Debug)]
 pub struct HeightMap {
     list: Vec<i32>,
     origin: Coordinate,
-    size: HeightMapSize,
+    size: Size,
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct HeightMapSize {
+pub struct Size {
     pub x: u32,
     pub z: u32,
 }
@@ -18,7 +18,7 @@ impl HeightMap {
         Self {
             list,
             origin: a.min(b),
-            size: HeightMapSize::from(a.size_between(b)),
+            size: Size::from(a.size_between(b)),
         }
     }
 
@@ -37,17 +37,17 @@ impl HeightMap {
     pub fn origin(&self) -> Coordinate {
         self.origin
     }
-    pub fn size(&self) -> HeightMapSize {
+    pub fn size(&self) -> Size {
         self.size
     }
 
-    pub fn iter(&self) -> HeightMapIter {
-        HeightMapIter::from(self)
+    pub fn iter(&self) -> Iter {
+        Iter::from(self)
     }
 }
 
-impl HeightMapSize {
-    pub fn from(size: ChunkSize) -> Self {
+impl Size {
+    pub fn from(size: chunk::Size) -> Self {
         Self {
             x: size.x,
             z: size.z,
@@ -69,17 +69,17 @@ impl HeightMapSize {
     }
 }
 
-pub struct HeightMapIter<'a> {
+pub struct Iter<'a> {
     height_map: &'a HeightMap,
     index: usize,
 }
 
-pub struct HeightMapItem<'a> {
+pub struct IterItem<'a> {
     height_map: &'a HeightMap,
     index: usize,
 }
 
-impl<'a> HeightMapIter<'a> {
+impl<'a> Iter<'a> {
     pub fn from(chunk: &'a HeightMap) -> Self {
         Self {
             height_map: chunk,
@@ -88,8 +88,8 @@ impl<'a> HeightMapIter<'a> {
     }
 }
 
-impl<'a> Iterator for HeightMapIter<'a> {
-    type Item = HeightMapItem<'a>;
+impl<'a> Iterator for Iter<'a> {
+    type Item = IterItem<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.index >= self.height_map.list.len() {
@@ -97,7 +97,7 @@ impl<'a> Iterator for HeightMapIter<'a> {
         }
         let index = self.index;
         self.index += 1;
-        let item = HeightMapItem {
+        let item = IterItem {
             height_map: self.height_map,
             index,
         };
@@ -105,7 +105,7 @@ impl<'a> Iterator for HeightMapIter<'a> {
     }
 }
 
-impl<'a> HeightMapItem<'a> {
+impl<'a> IterItem<'a> {
     pub fn chunk(&self) -> &'a HeightMap {
         self.height_map
     }
