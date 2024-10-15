@@ -1,4 +1,6 @@
+/// Types related to [`Chunk`]
 pub mod chunk;
+/// Types related to [`HeightMap`]
 pub mod height_map;
 
 mod block;
