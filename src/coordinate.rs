@@ -2,6 +2,7 @@ use std::{fmt, ops};
 
 use crate::chunk::Size;
 
+/// An absolute or relative coordinate in the Minecraft world
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Coordinate {
     pub x: i32,
@@ -10,6 +11,7 @@ pub struct Coordinate {
 }
 
 impl Coordinate {
+    /// Create a new coordinate
     pub const fn new(x: i32, y: i32, z: i32) -> Self {
         Self { x, y, z }
     }
