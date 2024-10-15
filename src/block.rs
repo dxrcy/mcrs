@@ -1,12 +1,16 @@
 use std::fmt;
 
+/// A Minecraft block, including `id` and `modifier`
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Block {
+    /// Block identifier. Eg. 'Andesite' has id `1` (`1:5`)
     pub id: i32,
+    /// Block modifier. Eg. 'Andesite' has modifier `5` (`1:5`)
     pub modifier: i32,
 }
 
 impl Block {
+    /// Create a new `Block`
     pub const fn new(id: i32, modifier: i32) -> Self {
         Self { id, modifier }
     }
@@ -26,14 +30,20 @@ impl fmt::Display for Block {
 macro_rules! blocks {
     ( $( $name:ident = ($id:expr, $modifier:expr); )* ) => {
         impl Block {
-            $( pub const $name: Self = Self::new($id, $modifier); )*
-
+            /// Get the non-standard name for the block.
+            ///
+            /// Corresponds to names of block constants, like `Block::ANDESITE`
             pub fn get_name(&self) -> Option<&'static str> {
                 match (self.id, self.modifier) {
                     $( ($id, $modifier) => Some(stringify!($name)), )*
                     _ => None,
                 }
             }
+
+            $(
+                #[doc = concat!("Minecraft `", stringify!($name), "` block")]
+                pub const $name: Self = Self::new($id, $modifier);
+            )*
         }
     };
 }
