@@ -57,8 +57,6 @@ impl Connection {
 
     /// Sets player position (block position of lower half of playermodel) to
     /// specified [`Coordinate`]
-    ///
-    /// [`Coordinate`]: crate::Coordinate
     pub fn set_player_position(&mut self, position: Coordinate) -> Result<()> {
         self.send(Command::new("player.setPos").arg_coordinate(position))
     }
@@ -72,8 +70,6 @@ impl Connection {
 
     /// Returns a [`Coordinate`] representing player position (block position of
     /// lower half of playermodel)
-    ///
-    /// [`Coordinate`]: crate::Coordinate
     pub fn get_player_position(&mut self) -> Result<Coordinate> {
         self.send(Command::new("player.getPos"))?;
         let response = self.recv()?;
@@ -90,9 +86,6 @@ impl Connection {
     }
 
     /// Sets block at [`Coordinate`] to specified [`Block`]
-    ///
-    /// [`Block`]: crate::Block
-    /// [`Coordinate`]: crate::Coordinate
     pub fn set_block(&mut self, location: Coordinate, block: Block) -> Result<()> {
         self.send(
             Command::new("world.setBlock")
@@ -102,9 +95,6 @@ impl Connection {
     }
 
     /// Returns [`Block`] object from specified [`Coordinate`]
-    ///
-    /// [`Block`]: crate::Block
-    /// [`Coordinate`]: crate::Coordinate
     pub fn get_block(&mut self, location: Coordinate) -> Result<Block> {
         self.send(Command::new("world.getBlockWithData").arg_coordinate(location))?;
         let response = self.recv()?;
@@ -115,9 +105,6 @@ impl Connection {
     /// Sets a cuboid of blocks to all be the specified [`Block`], with the
     /// corners of the cuboid specified by [`Coordinate`]s `a` and `b` (in any
     /// order)
-    ///
-    /// [`Block`]: crate::Block
-    /// [`Coordinate`]: crate::Coordinate
     pub fn set_blocks(&mut self, a: Coordinate, b: Coordinate, block: Block) -> Result<()> {
         self.send(
             Command::new("world.setBlocks")
@@ -129,8 +116,6 @@ impl Connection {
 
     /// Returns a 3D `Vec` of the [`Block`]s of cuboid specified by
     ///  [`Coordinate`]s `a` and `b` (in any order)
-    ///
-    /// [`Block`]: crate::Block
     pub fn get_blocks(&mut self, a: Coordinate, b: Coordinate) -> Result<Chunk> {
         self.send(
             Command::new("world.getBlocksWithData")
