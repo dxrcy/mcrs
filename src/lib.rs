@@ -1,5 +1,7 @@
 //! **mcrs**: A Rust interface for a Minecraft server.
 //!
+//! Based on [mcpp](https://github.com/rozukke/mcpp).
+//!
 //! Requires a server running [ELCI](https://github.com/rozukke/elci).
 //!
 //! ```
