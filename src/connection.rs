@@ -16,7 +16,9 @@ pub struct Connection {
 }
 
 impl Connection {
-    /// Default server address and port for ELCI
+    /// Default server address and port for [ELCI]
+    ///
+    /// [ELCI]: https://github.com/rozukke/elci
     pub const DEFAULT_ADDRESS: &'static str = "127.0.0.1:4711";
 
     /// Create a new connection with the default server address
@@ -50,7 +52,9 @@ impl Connection {
     }
 
     /// Performs an in-game Minecraft command. Players have to exist on the
-    /// server and should be server operators (default with ELCI)
+    /// server and should be server operators (default with [ELCI])
+    ///
+    /// [ELCI]: https://github.com/rozukke/elci
     pub fn do_command(&mut self, command: impl AsRef<str>) -> Result<()> {
         self.send(Command::new("player.doCommand").arg_string(command))
     }
