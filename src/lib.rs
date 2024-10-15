@@ -1,3 +1,13 @@
+//! **mcrs**: A Rust interface for a Minecraft server.
+//!
+//! Requires a server running [ELCI](https://github.com/rozukke/elci).
+//!
+//! ```
+//! # use mcrs::Connection;
+//! let mut mc = Connection::new().unwrap();
+//! mc.post_to_chat("Hello world!").unwrap();
+//! ```
+
 /// Types related to [`Chunk`]
 pub mod chunk;
 /// Types related to [`HeightMap`]
