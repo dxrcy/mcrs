@@ -1,5 +1,7 @@
 use crate::{chunk, Coordinate};
 
+/// Stores a 2D area of the world with the `y`-values of the highest solid block
+/// at each (`x`, `z`)
 #[derive(Clone, Debug)]
 pub struct HeightMap {
     list: Vec<i32>,
@@ -7,6 +9,7 @@ pub struct HeightMap {
     size: Size,
 }
 
+/// 2D size of a [`HeightMap`]
 #[derive(Clone, Copy, Debug)]
 pub struct Size {
     pub x: u32,
@@ -14,7 +17,7 @@ pub struct Size {
 }
 
 impl HeightMap {
-    pub fn new(a: Coordinate, b: Coordinate, list: Vec<i32>) -> Self {
+    pub(crate) fn new(a: Coordinate, b: Coordinate, list: Vec<i32>) -> Self {
         Self {
             list,
             origin: a.min(b),
@@ -22,6 +25,7 @@ impl HeightMap {
         }
     }
 
+    /// Get the height value at the **relative** `y`-agnostic [`Coordinate`]
     pub fn get(&self, coordinate: Coordinate) -> Option<i32> {
         if !self.size.contains(coordinate) {
             return None;
@@ -34,52 +38,65 @@ impl HeightMap {
         Some(self.list[index])
     }
 
+    /// Get the origin [`Coordinate`]
     pub fn origin(&self) -> Coordinate {
         self.origin
     }
+
+    /// Get the 2D size of the height map
     pub fn size(&self) -> Size {
         self.size
     }
 
+    /// Create an iterator over the height values in the height map
     pub fn iter(&self) -> Iter {
         Iter::from(self)
     }
 }
 
 impl Size {
-    pub fn from(size: chunk::Size) -> Self {
+    pub(crate) fn from(size: chunk::Size) -> Self {
         Self {
             x: size.x,
             z: size.z,
         }
     }
 
+    /// Convert a [`HeightMap`] index to a **relative** `y`-agnostic
+    /// [`Coordinate`]
     pub fn index_to_coordinate(&self, index: usize) -> Coordinate {
         let z = (index % self.z as usize) as i32;
         let x = (index / self.z as usize) as i32;
         Coordinate { x, y: 0, z }
     }
 
+    /// Convert a **relative** `y`-agnostic [`Coordinate`] to a [`HeightMap`]
+    /// index
     pub fn coordinate_to_index(&self, coordinate: Coordinate) -> usize {
         coordinate.z as usize + coordinate.x as usize * self.z as usize
     }
 
+    /// Returns `true` if the **relative** `y`-agnostic [`Coordinate`] is within
+    /// the [`HeightMap`] size
     pub fn contains(self, coordinate: Coordinate) -> bool {
         (0..self.x as i32).contains(&coordinate.x) && (0..self.z as i32).contains(&coordinate.z)
     }
 }
 
+/// An iterator over the height values in a [`HeightMap`]
 pub struct Iter<'a> {
     height_map: &'a HeightMap,
     index: usize,
 }
 
+/// An iterated item in a [`HeightMap`]
 pub struct IterItem<'a> {
     height_map: &'a HeightMap,
     index: usize,
 }
 
 impl<'a> Iter<'a> {
+    /// Create an iterator over the height values in a [`HeightMap`]
     pub fn from(chunk: &'a HeightMap) -> Self {
         Self {
             height_map: chunk,
@@ -106,10 +123,12 @@ impl<'a> Iterator for Iter<'a> {
 }
 
 impl<'a> IterItem<'a> {
-    pub fn chunk(&self) -> &'a HeightMap {
+    /// Get a reference to the entire [`HeightMap`]
+    pub fn height_map(&self) -> &'a HeightMap {
         self.height_map
     }
 
+    /// Get the height value corresponding to the [`HeightMap`] item
     pub fn height(&self) -> i32 {
         *self
             .height_map
@@ -118,9 +137,14 @@ impl<'a> IterItem<'a> {
             .expect("should be valid index in chunk")
     }
 
+    /// Get the **relative** `y`-agnostic [`Coordinate`] corresponding to the
+    /// [`HeightMap`] item
     pub fn position_relative(&self) -> Coordinate {
         self.height_map.size.index_to_coordinate(self.index)
     }
+
+    /// Get the **absolute** `y`-agnostic [`Coordinate`] corresponding to the
+    /// [`HeightMap`] item
     pub fn position_absolute(&self) -> Coordinate {
         self.position_relative() + self.height_map.origin
     }
