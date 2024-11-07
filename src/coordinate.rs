@@ -51,3 +51,23 @@ impl ops::Add for Coordinate {
         }
     }
 }
+
+impl From<[i32; 3]> for Coordinate {
+    fn from(value: [i32; 3]) -> Coordinate {
+        Coordinate {
+            x: value[0],
+            y: value[1],
+            z: value[2],
+        }
+    }
+}
+
+impl From<(i32, i32, i32)> for Coordinate {
+    fn from(value: (i32, i32, i32)) -> Coordinate {
+        Coordinate {
+            x: value.0,
+            y: value.1,
+            z: value.2,
+        }
+    }
+}
