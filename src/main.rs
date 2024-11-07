@@ -3,6 +3,8 @@ use mcrs::{Block, Connection, Coordinate};
 fn main() {
     let mut mc = Connection::new().expect("Failed to connect");
 
+    println!("{:?}", mc);
+
     mc.do_command("help\n").expect("Failed to send command");
 
     mc.post_to_chat("Hel)\nlo").expect("Failed to send");
@@ -50,6 +52,7 @@ fn main() {
             item.block(),
         );
     }
+    println!("{:?}", chunk);
 
     let location_a = Coordinate::new(297, 67, 167);
     let location_b = Coordinate::new(298, 69, 166);
@@ -71,6 +74,7 @@ fn main() {
         );
     }
 
+    println!("{:?}", height_map);
     println!("{}", height_map.iter().min().unwrap().height());
     println!("{}", height_map.iter().max().unwrap().height());
 

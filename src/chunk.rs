@@ -1,10 +1,12 @@
+use core::fmt;
+
 use crate::{Block, Coordinate};
 
 // Stores a 3D cuboid of [`Block`]s while preserving their location relative to
 // the base point they were gathered
 //
 /// [`Block`]: crate::Block
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Chunk {
     list: Vec<Block>,
     origin: Coordinate,
@@ -83,6 +85,12 @@ impl Size {
         (0..self.x as i32).contains(&coordinate.x)
             && (0..self.y as i32).contains(&coordinate.y)
             && (0..self.z as i32).contains(&coordinate.z)
+    }
+}
+
+impl fmt::Debug for Chunk {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<Chunk {}x{}x{}>", self.size.x, self.size.y, self.size.z)
     }
 }
 

@@ -1,10 +1,11 @@
+use core::fmt;
 use std::cmp::Ordering;
 
 use crate::{chunk, Coordinate};
 
 /// Stores a 2D area of the world with the `y`-values of the highest solid block
 /// at each (`x`, `z`)
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct HeightMap {
     list: Vec<i32>,
     origin: Coordinate,
@@ -82,6 +83,12 @@ impl Size {
     /// the [`HeightMap`] size
     pub fn contains(self, coordinate: Coordinate) -> bool {
         (0..self.x as i32).contains(&coordinate.x) && (0..self.z as i32).contains(&coordinate.z)
+    }
+}
+
+impl fmt::Debug for HeightMap {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<HeightMap {}x{}>", self.size.x, self.size.z)
     }
 }
 
