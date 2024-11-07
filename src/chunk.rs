@@ -1,4 +1,4 @@
-use core::fmt;
+use std::fmt;
 
 use crate::{Block, Coordinate};
 
@@ -22,7 +22,13 @@ pub struct Size {
 }
 
 impl Chunk {
-    pub(crate) fn new(a: Coordinate, b: Coordinate, list: Vec<Block>) -> Self {
+    pub(crate) fn new(
+        a: impl Into<Coordinate>,
+        b: impl Into<Coordinate>,
+        list: Vec<Block>,
+    ) -> Self {
+        let a = a.into();
+        let b = b.into();
         Self {
             list,
             origin: a.min(b),
@@ -31,7 +37,8 @@ impl Chunk {
     }
 
     /// Get the [`Block`] at the **relative** [`Coordinate`]
-    pub fn get(&self, coordinate: Coordinate) -> Option<Block> {
+    pub fn get(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
+        let coordinate = coordinate.into();
         if !self.size.contains(coordinate) {
             return None;
         }
@@ -70,7 +77,8 @@ impl Size {
     }
 
     /// Convert a **relative** [`Coordinate`] to a [`Chunk`] index
-    pub fn coordinate_to_index(&self, coordinate: Coordinate) -> usize {
+    pub fn coordinate_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
+        let coordinate = coordinate.into();
         let [x, y, z] = [
             coordinate.x as usize,
             coordinate.y as usize,
@@ -81,7 +89,8 @@ impl Size {
 
     /// Returns `true` if the **relative** [`Coordinate`] is within the
     /// [`Chunk`] size
-    pub fn contains(&self, coordinate: Coordinate) -> bool {
+    pub fn contains(&self, coordinate: impl Into<Coordinate>) -> bool {
+        let coordinate = coordinate.into();
         (0..self.x as i32).contains(&coordinate.x)
             && (0..self.y as i32).contains(&coordinate.y)
             && (0..self.z as i32).contains(&coordinate.z)
@@ -89,7 +98,7 @@ impl Size {
 }
 
 impl fmt::Debug for Chunk {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "<Chunk {}x{}x{}>", self.size.x, self.size.y, self.size.z)
     }
 }

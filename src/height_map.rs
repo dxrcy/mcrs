@@ -1,5 +1,4 @@
-use core::fmt;
-use std::cmp::Ordering;
+use std::{cmp::Ordering, fmt};
 
 use crate::{chunk, Coordinate};
 
@@ -20,7 +19,9 @@ pub struct Size {
 }
 
 impl HeightMap {
-    pub(crate) fn new(a: Coordinate, b: Coordinate, list: Vec<i32>) -> Self {
+    pub(crate) fn new(a: impl Into<Coordinate>, b: impl Into<Coordinate>, list: Vec<i32>) -> Self {
+        let a = a.into();
+        let b = b.into();
         Self {
             list,
             origin: a.min(b),
@@ -29,7 +30,8 @@ impl HeightMap {
     }
 
     /// Get the height value at the **relative** `y`-agnostic [`Coordinate`]
-    pub fn get(&self, coordinate: Coordinate) -> Option<i32> {
+    pub fn get(&self, coordinate: impl Into<Coordinate>) -> Option<i32> {
+        let coordinate = coordinate.into();
         if !self.size.contains(coordinate) {
             return None;
         }
@@ -75,19 +77,21 @@ impl Size {
 
     /// Convert a **relative** `y`-agnostic [`Coordinate`] to a [`HeightMap`]
     /// index
-    pub fn coordinate_to_index(&self, coordinate: Coordinate) -> usize {
+    pub fn coordinate_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
+        let coordinate = coordinate.into();
         coordinate.z as usize + coordinate.x as usize * self.z as usize
     }
 
     /// Returns `true` if the **relative** `y`-agnostic [`Coordinate`] is within
     /// the [`HeightMap`] size
-    pub fn contains(self, coordinate: Coordinate) -> bool {
+    pub fn contains(self, coordinate: impl Into<Coordinate>) -> bool {
+        let coordinate = coordinate.into();
         (0..self.x as i32).contains(&coordinate.x) && (0..self.z as i32).contains(&coordinate.z)
     }
 }
 
 impl fmt::Debug for HeightMap {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "<HeightMap {}x{}>", self.size.x, self.size.z)
     }
 }

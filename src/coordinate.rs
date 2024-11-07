@@ -40,10 +40,14 @@ impl fmt::Display for Coordinate {
     }
 }
 
-impl ops::Add for Coordinate {
+impl<T> ops::Add<T> for Coordinate
+where
+    T: Into<Coordinate>,
+{
     type Output = Self;
 
-    fn add(self, rhs: Self) -> Self::Output {
+    fn add(self, rhs: T) -> Self::Output {
+        let rhs = rhs.into();
         Self {
             x: self.x + rhs.x,
             y: self.y + rhs.y,

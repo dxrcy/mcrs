@@ -61,13 +61,14 @@ impl Connection {
 
     /// Sets player position (block position of lower half of playermodel) to
     /// specified [`Coordinate`]
-    pub fn set_player_position(&mut self, position: Coordinate) -> Result<()> {
-        self.send(Command::new("player.setPos").arg_coordinate(position))
+    pub fn set_player_position(&mut self, position: impl Into<Coordinate>) -> Result<()> {
+        self.send(Command::new("player.setPos").arg_coordinate(position.into()))
     }
 
     /// Sets player position to be one above specified tile (i.e. tile = block
     /// player is standing on)
-    pub fn set_player_tile_position(&mut self, mut position: Coordinate) -> Result<()> {
+    pub fn set_player_tile_position(&mut self, position: impl Into<Coordinate>) -> Result<()> {
+        let mut position = position.into();
         position.y += 1;
         self.set_player_position(position)
     }
@@ -90,17 +91,17 @@ impl Connection {
     }
 
     /// Sets block at [`Coordinate`] to specified [`Block`]
-    pub fn set_block(&mut self, location: Coordinate, block: Block) -> Result<()> {
+    pub fn set_block(&mut self, location: impl Into<Coordinate>, block: Block) -> Result<()> {
         self.send(
             Command::new("world.setBlock")
-                .arg_coordinate(location)
+                .arg_coordinate(location.into())
                 .arg_block(block),
         )
     }
 
     /// Returns [`Block`] object from specified [`Coordinate`]
-    pub fn get_block(&mut self, location: Coordinate) -> Result<Block> {
-        self.send(Command::new("world.getBlockWithData").arg_coordinate(location))?;
+    pub fn get_block(&mut self, location: impl Into<Coordinate>) -> Result<Block> {
+        self.send(Command::new("world.getBlockWithData").arg_coordinate(location.into()))?;
         let response = self.recv()?;
         let block = response.as_block().expect("malformed server response");
         Ok(block)
@@ -109,18 +110,29 @@ impl Connection {
     /// Sets a cuboid of blocks to all be the specified [`Block`], with the
     /// corners of the cuboid specified by [`Coordinate`]s `a` and `b` (in any
     /// order)
-    pub fn set_blocks(&mut self, a: Coordinate, b: Coordinate, block: Block) -> Result<()> {
+    pub fn set_blocks(
+        &mut self,
+        a: impl Into<Coordinate>,
+        b: impl Into<Coordinate>,
+        block: Block,
+    ) -> Result<()> {
         self.send(
             Command::new("world.setBlocks")
-                .arg_coordinate(a)
-                .arg_coordinate(b)
+                .arg_coordinate(a.into())
+                .arg_coordinate(b.into())
                 .arg_block(block),
         )
     }
 
     /// Returns a 3D `Vec` of the [`Block`]s of cuboid specified by
     ///  [`Coordinate`]s `a` and `b` (in any order)
-    pub fn get_blocks(&mut self, a: Coordinate, b: Coordinate) -> Result<Chunk> {
+    pub fn get_blocks(
+        &mut self,
+        a: impl Into<Coordinate>,
+        b: impl Into<Coordinate>,
+    ) -> Result<Chunk> {
+        let a = a.into();
+        let b = b.into();
         self.send(
             Command::new("world.getBlocksWithData")
                 .arg_coordinate(a)
@@ -151,7 +163,13 @@ impl Connection {
     /// performance gains
     ///
     /// [`get_height`]: Connection::get_height
-    pub fn get_heights(&mut self, a: Coordinate, b: Coordinate) -> Result<HeightMap> {
+    pub fn get_heights(
+        &mut self,
+        a: impl Into<Coordinate>,
+        b: impl Into<Coordinate>,
+    ) -> Result<HeightMap> {
+        let a = a.into();
+        let b = b.into();
         self.send(
             Command::new("world.getHeights")
                 .arg_int(a.x)
