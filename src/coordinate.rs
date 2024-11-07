@@ -56,6 +56,22 @@ where
     }
 }
 
+impl<T> ops::Sub<T> for Coordinate
+where
+    T: Into<Coordinate>,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: T) -> Self::Output {
+        let rhs = rhs.into();
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
 impl From<[i32; 3]> for Coordinate {
     fn from(value: [i32; 3]) -> Coordinate {
         Coordinate {

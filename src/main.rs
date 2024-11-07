@@ -79,4 +79,7 @@ fn main() {
     println!("{}", height_map.iter().max().unwrap().height());
 
     println!("{}", Coordinate::from([4, 5, 6]));
+
+    println!("{}", Coordinate::from([4, 5, 6]) + (7, 8, 9));
+    println!("{}", Coordinate::from((4, 5, 6)) - [7, 8, 9]);
 }
