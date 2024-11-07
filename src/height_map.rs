@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::{chunk, Coordinate};
 
 /// Stores a 2D area of the world with the `y`-values of the highest solid block
@@ -147,5 +149,31 @@ impl<'a> IterItem<'a> {
     /// [`HeightMap`] item
     pub fn position_absolute(&self) -> Coordinate {
         self.position_relative() + self.height_map.origin
+    }
+}
+
+impl PartialEq for IterItem<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.height() == other.height()
+    }
+}
+
+impl Eq for IterItem<'_> {}
+
+impl PartialOrd for IterItem<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for IterItem<'_> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.height() < other.height() {
+            return Ordering::Less;
+        }
+        if self.height() > other.height() {
+            return Ordering::Greater;
+        }
+        Ordering::Equal
     }
 }

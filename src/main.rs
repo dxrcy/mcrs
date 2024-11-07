@@ -70,4 +70,7 @@ fn main() {
             item.height(),
         );
     }
+
+    println!("{}", height_map.iter().min().unwrap().height());
+    println!("{}", height_map.iter().max().unwrap().height());
 }
