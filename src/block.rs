@@ -4,14 +4,14 @@ use std::fmt;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Block {
     /// Block identifier. Eg. 'Andesite' has id `1` (`1:5`)
-    pub id: i32,
+    pub id: u32,
     /// Block modifier. Eg. 'Andesite' has modifier `5` (`1:5`)
-    pub modifier: i32,
+    pub modifier: u32,
 }
 
 impl Block {
     /// Create a new `Block`
-    pub const fn new(id: i32, modifier: i32) -> Self {
+    pub const fn new(id: u32, modifier: u32) -> Self {
         Self { id, modifier }
     }
 }

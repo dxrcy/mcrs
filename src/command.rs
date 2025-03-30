@@ -65,7 +65,13 @@ impl Arg for &str {
     }
 }
 
+// TODO(opt): Avoid `to_string` alloc
 impl Arg for i32 {
+    fn push_to_command(self, command: &mut String) {
+        command.push_str(&self.to_string());
+    }
+}
+impl Arg for u32 {
     fn push_to_command(self, command: &mut String) {
         command.push_str(&self.to_string());
     }

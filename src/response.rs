@@ -51,8 +51,8 @@ fn parse_coord(item: &str) -> Option<Coordinate> {
 
 fn parse_block(item: &str) -> Option<Block> {
     let mut iter = IntegerList::from(item);
-    let id = iter.next()?;
-    let modifier = iter.next()?;
+    let id = iter.next()? as u32;
+    let modifier = iter.next()? as u32;
     if iter.next().is_some() {
         return None;
     }
