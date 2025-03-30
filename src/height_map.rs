@@ -12,7 +12,7 @@ pub struct HeightMap {
 }
 
 /// 2D size of a [`HeightMap`]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct Size {
     pub x: u32,
     pub z: u32,
@@ -90,9 +90,15 @@ impl Size {
     }
 }
 
+impl fmt::Debug for Size {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}x{}", self.x, self.z)
+    }
+}
+
 impl fmt::Debug for HeightMap {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<HeightMap {}x{}>", self.size.x, self.size.z)
+        write!(f, "<HeightMap {:?}>", self.size)
     }
 }
 

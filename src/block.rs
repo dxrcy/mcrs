@@ -1,7 +1,7 @@
 use std::fmt;
 
 /// A Minecraft block, including `id` and `modifier`
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Block {
     /// Block identifier. Eg. 'Andesite' has id `1` (`1:5`)
     pub id: u32,
@@ -13,6 +13,12 @@ impl Block {
     /// Create a new `Block`
     pub const fn new(id: u32, modifier: u32) -> Self {
         Self { id, modifier }
+    }
+}
+
+impl fmt::Debug for Block {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}:{})", self.id, self.modifier)
     }
 }
 

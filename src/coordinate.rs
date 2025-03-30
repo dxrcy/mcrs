@@ -3,7 +3,7 @@ use std::{fmt, ops};
 use crate::chunk::Size;
 
 /// An absolute or relative coordinate in the Minecraft world
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Coordinate {
     pub x: i32,
     pub y: i32,
@@ -35,6 +35,11 @@ impl Coordinate {
 }
 
 impl fmt::Display for Coordinate {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
+    }
+}
+impl fmt::Debug for Coordinate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }

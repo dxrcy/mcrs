@@ -14,7 +14,7 @@ pub struct Chunk {
 }
 
 /// 3D size of a [`Chunk`]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct Size {
     pub x: u32,
     pub y: u32,
@@ -97,9 +97,15 @@ impl Size {
     }
 }
 
+impl fmt::Debug for Size {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}x{}x{}", self.x, self.y, self.z)
+    }
+}
+
 impl fmt::Debug for Chunk {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<Chunk {}x{}x{}>", self.size.x, self.size.y, self.size.z)
+        write!(f, "<Chunk {:?}>", self.size)
     }
 }
 
