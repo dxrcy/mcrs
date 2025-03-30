@@ -103,6 +103,14 @@ impl fmt::Debug for Chunk {
     }
 }
 
+impl<'a> IntoIterator for &'a Chunk {
+    type Item = IterItem<'a>;
+    type IntoIter = Iter<'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        Iter::from(self)
+    }
+}
+
 /// An iterator over the blocks in a [`Chunk`]
 pub struct Iter<'a> {
     chunk: &'a Chunk,

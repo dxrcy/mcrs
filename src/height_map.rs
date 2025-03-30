@@ -96,6 +96,14 @@ impl fmt::Debug for HeightMap {
     }
 }
 
+impl<'a> IntoIterator for &'a HeightMap {
+    type Item = IterItem<'a>;
+    type IntoIter = Iter<'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        Iter::from(self)
+    }
+}
+
 /// An iterator over the height values in a [`HeightMap`]
 pub struct Iter<'a> {
     height_map: &'a HeightMap,
