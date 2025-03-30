@@ -17,7 +17,7 @@ impl Coordinate {
     }
 
     // TODO(rename): Possibly a misleading method name?
-    pub(crate) fn min(self, other: Self) -> Self {
+    pub fn min(self, other: Self) -> Self {
         Coordinate {
             x: self.x.min(other.x),
             y: self.y.min(other.y),
@@ -25,7 +25,7 @@ impl Coordinate {
         }
     }
 
-    pub(crate) fn size_between(self, other: Self) -> Size {
+    pub fn size_between(self, other: Self) -> Size {
         Size {
             x: (self.x - other.x).unsigned_abs() + 1,
             y: (self.y - other.y).unsigned_abs() + 1,
