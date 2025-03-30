@@ -172,3 +172,14 @@ impl<'a> IterItem<'a> {
         self.position_relative() + self.chunk.origin
     }
 }
+
+impl<'a> fmt::Debug for IterItem<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "<Chunk item {} {}>",
+            self.position_relative(),
+            self.block(),
+        )
+    }
+}

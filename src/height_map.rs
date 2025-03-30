@@ -171,6 +171,17 @@ impl<'a> IterItem<'a> {
     }
 }
 
+impl<'a> fmt::Debug for IterItem<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "<HeightMap item {} {}>",
+            self.position_relative(),
+            self.height(),
+        )
+    }
+}
+
 impl PartialEq for IterItem<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.height() == other.height()
