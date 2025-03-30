@@ -67,6 +67,10 @@ impl Chunk {
 }
 
 impl Size {
+    pub fn new(x: u32, y: u32, z: u32) -> Self {
+        Self { x, y, z }
+    }
+
     /// Convert a [`Chunk`] index to a **relative** [`Coordinate`]
     pub fn index_to_coordinate(&self, index: usize) -> Coordinate {
         let z = (index % self.z as usize) as i32;

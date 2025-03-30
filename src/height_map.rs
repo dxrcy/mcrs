@@ -60,6 +60,10 @@ impl HeightMap {
 }
 
 impl Size {
+    pub fn new(x: u32, z: u32) -> Self {
+        Self { x, z }
+    }
+
     pub(crate) fn from(size: chunk::Size) -> Self {
         Self {
             x: size.x,
