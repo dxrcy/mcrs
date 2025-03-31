@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::Coordinate;
+use crate::{Coordinate, Coordinate2D};
 
 /// 3D size in blocks.
 ///
@@ -60,30 +60,21 @@ impl Size2D {
         Self { x, z }
     }
 
-    pub(crate) fn from(size: crate::Size) -> Self {
-        Self {
-            x: size.x,
-            z: size.z,
-        }
-    }
-
-    /// Returns `true` if the **relative** `y`-agnostic [`Coordinate`] is within the size
-    pub fn contains(self, coordinate: impl Into<Coordinate>) -> bool {
+    /// Returns `true` if the **relative** [`Coordinate2D`] is within the size
+    pub fn contains(self, coordinate: impl Into<Coordinate2D>) -> bool {
         let coordinate = coordinate.into();
         (0..self.x as i32).contains(&coordinate.x) && (0..self.z as i32).contains(&coordinate.z)
     }
 
-    /// Convert a [`HeightMap`] index to a **relative** `y`-agnostic
-    /// [`Coordinate`]
-    pub fn index_to_coordinate(&self, index: usize) -> Coordinate {
+    /// Convert a [`HeightMap`] index to a **relative** [`Coordinate2D`]
+    pub fn index_to_coordinate(&self, index: usize) -> Coordinate2D {
         let z = (index % self.z as usize) as i32;
         let x = (index / self.z as usize) as i32;
-        Coordinate { x, y: 0, z }
+        Coordinate2D { x, z }
     }
 
-    /// Convert a **relative** `y`-agnostic [`Coordinate`] to a [`HeightMap`]
-    /// index
-    pub fn coordinate_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
+    /// Convert a **relative** [`Coordinate2D`] to a [`HeightMap`] index
+    pub fn coordinate_to_index(&self, coordinate: impl Into<Coordinate2D>) -> usize {
         let coordinate = coordinate.into();
         coordinate.z as usize + coordinate.x as usize * self.z as usize
     }
@@ -98,5 +89,14 @@ impl fmt::Debug for Size {
 impl fmt::Debug for Size2D {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}x{}", self.x, self.z)
+    }
+}
+
+impl From<Size> for Size2D {
+    fn from(size: Size) -> Self {
+        Self {
+            x: size.x,
+            z: size.z,
+        }
     }
 }

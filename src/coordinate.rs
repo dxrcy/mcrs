@@ -179,3 +179,12 @@ impl From<(i32, i32)> for Coordinate2D {
         }
     }
 }
+
+impl From<Coordinate> for Coordinate2D {
+    fn from(coord: Coordinate) -> Self {
+        Self {
+            x: coord.x,
+            z: coord.z,
+        }
+    }
+}

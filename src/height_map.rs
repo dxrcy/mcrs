@@ -1,29 +1,33 @@
 use std::{cmp::Ordering, fmt};
 
-use crate::{Coordinate, Size2D};
+use crate::{Coordinate2D, Size2D};
 
 /// Stores a 2D area of the world with the `y`-values of the highest solid block
 /// at each (`x`, `z`)
 #[derive(Clone)]
 pub struct HeightMap {
     list: Vec<i32>,
-    origin: Coordinate,
+    origin: Coordinate2D,
     size: Size2D,
 }
 
 impl HeightMap {
-    pub(crate) fn new(a: impl Into<Coordinate>, b: impl Into<Coordinate>, list: Vec<i32>) -> Self {
+    pub(crate) fn new(
+        a: impl Into<Coordinate2D>,
+        b: impl Into<Coordinate2D>,
+        list: Vec<i32>,
+    ) -> Self {
         let a = a.into();
         let b = b.into();
         Self {
             list,
             origin: a.min(b),
-            size: Size2D::from(a.size_between(b)),
+            size: a.size_between(b),
         }
     }
 
-    /// Get the height value at the **relative** `y`-agnostic [`Coordinate`]
-    pub fn get(&self, coordinate: impl Into<Coordinate>) -> Option<i32> {
+    /// Get the height value at the **relative** [`Coordinate2D`]
+    pub fn get(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
         let coordinate = coordinate.into();
         if !self.size.contains(coordinate) {
             return None;
@@ -36,13 +40,13 @@ impl HeightMap {
         Some(self.list[index])
     }
 
-    /// Get the height value at the **absolute** `y`-agnostic [`Coordinate`]
-    pub fn get_absolute(&self, coordinate: impl Into<Coordinate>) -> Option<i32> {
+    /// Get the height value at the **absolute** [`Coordinate2D`]
+    pub fn get_absolute(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
         self.get(coordinate.into() - self.origin)
     }
 
-    /// Get the origin [`Coordinate`]
-    pub fn origin(&self) -> Coordinate {
+    /// Get the origin [`Coordinate2D`]
+    pub fn origin(&self) -> Coordinate2D {
         self.origin
     }
 
@@ -125,15 +129,13 @@ impl<'a> IterItem<'a> {
             .expect("should be valid index in chunk")
     }
 
-    /// Get the **relative** `y`-agnostic [`Coordinate`] corresponding to the
-    /// [`HeightMap`] item
-    pub fn position_relative(&self) -> Coordinate {
+    /// Get the **relative** [`Coordinate2D`] corresponding to the [`HeightMap`] item
+    pub fn position_relative(&self) -> Coordinate2D {
         self.height_map.size.index_to_coordinate(self.index)
     }
 
-    /// Get the **absolute** `y`-agnostic [`Coordinate`] corresponding to the
-    /// [`HeightMap`] item
-    pub fn position_absolute(&self) -> Coordinate {
+    /// Get the **absolute** [`Coordinate2D`] corresponding to the [`HeightMap`] item
+    pub fn position_absolute(&self) -> Coordinate2D {
         self.position_relative() + self.height_map.origin
     }
 }

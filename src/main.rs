@@ -4,8 +4,6 @@ fn main() {
     println!("{}", Block::new(1, 8));
     println!("{}", Block::new(36, 0));
 
-    let a = Block::SAND;
-
     let mut mc = Connection::new().expect("Failed to connect");
 
     println!("{:?}", mc);
