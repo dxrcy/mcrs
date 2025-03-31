@@ -1,9 +1,13 @@
-feat: Coordinate2D
-
 feat: implement coordinate + size
 
 chore: replace 'absolute'/'relative' with 'worldspace'/'offset' ?
 lint: make doc comments consistent
 
 feat(test): convert `main.rs` to integration test
+
+refactor: overhaul response reading, avoid allocation
+
+feat: make appropriate functions `const`
+
+lint: clippy
 
