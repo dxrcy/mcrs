@@ -29,7 +29,7 @@ impl fmt::Display for Block {
             "{} ({}:{})",
             self.get_display_name(),
             self.id,
-            self.modifier
+            self.modifier,
         )?;
         Ok(())
     }
@@ -61,7 +61,7 @@ macro_rules! blocks {
             }
 
             $(
-                #[doc = concat!("Minecraft `", stringify!($name), "` block")]
+                #[doc = concat!("Minecraft ", stringify!($name), " block (", $id, ":", $modifier, ").")]
                 pub const $name: Self = Self::new($id, $modifier);
             )*
         }
