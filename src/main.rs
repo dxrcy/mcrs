@@ -50,8 +50,8 @@ fn main() {
     for item in chunk.iter() {
         println!(
             "{} {} {}",
-            item.position_relative(),
-            item.position_absolute(),
+            item.position_offset(),
+            item.position_worldspace(),
             item.block(),
         );
     }
@@ -71,8 +71,8 @@ fn main() {
     for item in height_map.iter() {
         println!(
             "{} {} {}",
-            item.position_relative(),
-            item.position_absolute(),
+            item.position_offset(),
+            item.position_worldspace(),
             item.height(),
         );
     }

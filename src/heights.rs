@@ -27,12 +27,12 @@ impl Heights {
     }
 
     /// Get the height value at the **offset** [`Coordinate2D`].
-    pub fn get(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
+    pub fn get_offset(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
         let coordinate = coordinate.into();
         if !self.size.contains(coordinate) {
             return None;
         }
-        let index = self.size.coordinate_to_index(coordinate);
+        let index = self.size.offset_to_index(coordinate);
         assert!(
             index < self.list.len(),
             "calculated index should be less than internal list length"
@@ -41,8 +41,8 @@ impl Heights {
     }
 
     /// Get the height value at the **worldspace** [`Coordinate2D`].
-    pub fn get_absolute(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
-        self.get(coordinate.into() - self.origin)
+    pub fn get_worldspace(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
+        self.get_offset(coordinate.into() - self.origin)
     }
 
     /// Get the origin [`Coordinate2D`].
@@ -134,13 +134,13 @@ impl<'a> IterItem<'a> {
     }
 
     /// Get the **offset** [`Coordinate2D`] corresponding to the [`Heights`] item.
-    pub fn position_relative(&self) -> Coordinate2D {
-        self.height_map.size.index_to_coordinate(self.index)
+    pub fn position_offset(&self) -> Coordinate2D {
+        self.height_map.size.index_to_offset(self.index)
     }
 
     /// Get the **worldspace** [`Coordinate2D`] corresponding to the [`Heights`] item.
-    pub fn position_absolute(&self) -> Coordinate2D {
-        self.position_relative() + self.height_map.origin
+    pub fn position_worldspace(&self) -> Coordinate2D {
+        self.position_offset() + self.height_map.origin
     }
 }
 
@@ -149,7 +149,7 @@ impl<'a> fmt::Debug for IterItem<'a> {
         write!(
             f,
             "<HeightMap item {} {}>",
-            self.position_relative(),
+            self.position_offset(),
             self.height(),
         )
     }

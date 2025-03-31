@@ -41,7 +41,7 @@ impl Size {
     /// Convert a [`Chunk`] index to an **offset** [`Coordinate`].
     ///
     /// [`Chunk`]: crate::Chunk
-    pub(crate) fn index_to_coordinate(&self, index: usize) -> Coordinate {
+    pub(crate) fn index_to_offset(&self, index: usize) -> Coordinate {
         let z = (index % self.z as usize) as i32;
         let xy = index / self.z as usize;
         let x = (xy % self.x as usize) as i32;
@@ -52,7 +52,7 @@ impl Size {
     /// Convert an **offset** [`Coordinate`] to a [`Chunk`] index.
     ///
     /// [`Chunk`]: crate::Chunk
-    pub(crate) fn coordinate_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
+    pub(crate) fn offset_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
         let coordinate = coordinate.into();
         let [x, y, z] = [
             coordinate.x as usize,
@@ -77,7 +77,7 @@ impl Size2D {
     /// Convert a [`Heights`] index to an **offset** [`Coordinate2D`].
     ///
     /// [`Heights`]: crate::Heights
-    pub(crate) fn index_to_coordinate(&self, index: usize) -> Coordinate2D {
+    pub(crate) fn index_to_offset(&self, index: usize) -> Coordinate2D {
         let z = (index % self.z as usize) as i32;
         let x = (index / self.z as usize) as i32;
         Coordinate2D { x, z }
@@ -86,7 +86,7 @@ impl Size2D {
     /// Convert an **offset** [`Coordinate2D`] to a [`Heights`] index.
     ///
     /// [`Heights`]: crate::Heights
-    pub(crate) fn coordinate_to_index(&self, coordinate: impl Into<Coordinate2D>) -> usize {
+    pub(crate) fn offset_to_index(&self, coordinate: impl Into<Coordinate2D>) -> usize {
         let coordinate = coordinate.into();
         coordinate.z as usize + coordinate.x as usize * self.z as usize
     }

@@ -27,12 +27,12 @@ impl Chunk {
     }
 
     /// Get the [`Block`] at the **offset** [`Coordinate`].
-    pub fn get(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
+    pub fn get_offset(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
         let coordinate = coordinate.into();
         if !self.size.contains(coordinate) {
             return None;
         }
-        let index = self.size.coordinate_to_index(coordinate);
+        let index = self.size.offset_to_index(coordinate);
         assert!(
             index < self.list.len(),
             "calculated index should be less than internal list length"
@@ -41,8 +41,8 @@ impl Chunk {
     }
 
     /// Get the [`Block`] at the **worldspace** [`Coordinate`]
-    pub fn get_absolute(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
-        self.get(coordinate.into() - self.origin)
+    pub fn get_worldspace(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
+        self.get_offset(coordinate.into() - self.origin)
     }
 
     /// Get the origin [`Coordinate`].
@@ -131,13 +131,13 @@ impl<'a> IterItem<'a> {
     }
 
     /// Get the **offset** [`Coordinate`] corresponding to the [`Chunk`] item.
-    pub fn position_relative(&self) -> Coordinate {
-        self.chunk.size.index_to_coordinate(self.index)
+    pub fn position_offset(&self) -> Coordinate {
+        self.chunk.size.index_to_offset(self.index)
     }
 
     /// Get the **worldspace** [`Coordinate`] corresponding to the [`Chunk`] item.
-    pub fn position_absolute(&self) -> Coordinate {
-        self.position_relative() + self.chunk.origin
+    pub fn position_worldspace(&self) -> Coordinate {
+        self.position_offset() + self.chunk.origin
     }
 }
 
@@ -146,7 +146,7 @@ impl<'a> fmt::Debug for IterItem<'a> {
         write!(
             f,
             "<Chunk item {:?} {:?}>",
-            self.position_relative(),
+            self.position_offset(),
             self.block(),
         )
     }
