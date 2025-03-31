@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, fmt};
 
-use crate::{chunk, Coordinate};
+use crate::{Coordinate, Size2D};
 
 /// Stores a 2D area of the world with the `y`-values of the highest solid block
 /// at each (`x`, `z`)
@@ -8,14 +8,7 @@ use crate::{chunk, Coordinate};
 pub struct HeightMap {
     list: Vec<i32>,
     origin: Coordinate,
-    size: Size,
-}
-
-/// 2D size of a [`HeightMap`]
-#[derive(Clone, Copy)]
-pub struct Size {
-    pub x: u32,
-    pub z: u32,
+    size: Size2D,
 }
 
 impl HeightMap {
@@ -25,7 +18,7 @@ impl HeightMap {
         Self {
             list,
             origin: a.min(b),
-            size: Size::from(a.size_between(b)),
+            size: Size2D::from(a.size_between(b)),
         }
     }
 
@@ -54,54 +47,13 @@ impl HeightMap {
     }
 
     /// Get the 2D size of the height map
-    pub fn size(&self) -> Size {
+    pub fn size(&self) -> Size2D {
         self.size
     }
 
     /// Create an iterator over the height values in the height map
     pub fn iter(&self) -> Iter {
         Iter::from(self)
-    }
-}
-
-impl Size {
-    pub fn new(x: u32, z: u32) -> Self {
-        Self { x, z }
-    }
-
-    pub(crate) fn from(size: chunk::Size) -> Self {
-        Self {
-            x: size.x,
-            z: size.z,
-        }
-    }
-
-    /// Convert a [`HeightMap`] index to a **relative** `y`-agnostic
-    /// [`Coordinate`]
-    pub fn index_to_coordinate(&self, index: usize) -> Coordinate {
-        let z = (index % self.z as usize) as i32;
-        let x = (index / self.z as usize) as i32;
-        Coordinate { x, y: 0, z }
-    }
-
-    /// Convert a **relative** `y`-agnostic [`Coordinate`] to a [`HeightMap`]
-    /// index
-    pub fn coordinate_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
-        let coordinate = coordinate.into();
-        coordinate.z as usize + coordinate.x as usize * self.z as usize
-    }
-
-    /// Returns `true` if the **relative** `y`-agnostic [`Coordinate`] is within
-    /// the [`HeightMap`] size
-    pub fn contains(self, coordinate: impl Into<Coordinate>) -> bool {
-        let coordinate = coordinate.into();
-        (0..self.x as i32).contains(&coordinate.x) && (0..self.z as i32).contains(&coordinate.z)
-    }
-}
-
-impl fmt::Debug for Size {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}x{}", self.x, self.z)
     }
 }
 

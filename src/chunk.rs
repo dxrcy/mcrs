@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{Block, Coordinate};
+use crate::{Block, Coordinate, Size};
 
 // Stores a 3D cuboid of [`Block`]s while preserving their location relative to
 // the base point they were gathered
@@ -11,14 +11,6 @@ pub struct Chunk {
     list: Vec<Block>,
     origin: Coordinate,
     size: Size,
-}
-
-/// 3D size of a [`Chunk`]
-#[derive(Clone, Copy)]
-pub struct Size {
-    pub x: u32,
-    pub y: u32,
-    pub z: u32,
 }
 
 impl Chunk {
@@ -68,47 +60,6 @@ impl Chunk {
     /// Create an iterator over the blocks in the chunk
     pub fn iter(&self) -> Iter {
         Iter::from(self)
-    }
-}
-
-impl Size {
-    pub fn new(x: u32, y: u32, z: u32) -> Self {
-        Self { x, y, z }
-    }
-
-    /// Convert a [`Chunk`] index to a **relative** [`Coordinate`]
-    pub fn index_to_coordinate(&self, index: usize) -> Coordinate {
-        let z = (index % self.z as usize) as i32;
-        let xy = index / self.z as usize;
-        let x = (xy % self.x as usize) as i32;
-        let y = (xy / self.x as usize) as i32;
-        Coordinate { x, y, z }
-    }
-
-    /// Convert a **relative** [`Coordinate`] to a [`Chunk`] index
-    pub fn coordinate_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
-        let coordinate = coordinate.into();
-        let [x, y, z] = [
-            coordinate.x as usize,
-            coordinate.y as usize,
-            coordinate.z as usize,
-        ];
-        z + (x + y * self.x as usize) * self.z as usize
-    }
-
-    /// Returns `true` if the **relative** [`Coordinate`] is within the
-    /// [`Chunk`] size
-    pub fn contains(&self, coordinate: impl Into<Coordinate>) -> bool {
-        let coordinate = coordinate.into();
-        (0..self.x as i32).contains(&coordinate.x)
-            && (0..self.y as i32).contains(&coordinate.y)
-            && (0..self.z as i32).contains(&coordinate.z)
-    }
-}
-
-impl fmt::Debug for Size {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}x{}x{}", self.x, self.y, self.z)
     }
 }
 

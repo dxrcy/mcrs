@@ -20,9 +20,11 @@ mod command;
 mod connection;
 mod coordinate;
 mod response;
+mod size;
 
 pub use block::Block;
 pub use chunk::Chunk;
 pub use connection::Connection;
-pub use coordinate::Coordinate;
+pub use coordinate::{Coordinate, Coordinate2D};
 pub use height_map::HeightMap;
+pub use size::{Size, Size2D};
