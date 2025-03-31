@@ -2,10 +2,8 @@ use std::fmt;
 
 use crate::{Block, Coordinate, Size};
 
-// Stores a 3D cuboid of [`Block`]s while preserving their location relative to
-// the base point they were gathered
-//
-/// [`Block`]: crate::Block
+/// Stores a 3D cuboid of [`Block`]s while preserving their location relative to
+/// the base point they were gathered.
 #[derive(Clone)]
 pub struct Chunk {
     list: Vec<Block>,
@@ -28,7 +26,7 @@ impl Chunk {
         }
     }
 
-    /// Get the [`Block`] at the **relative** [`Coordinate`]
+    /// Get the [`Block`] at the **offset** [`Coordinate`].
     pub fn get(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
         let coordinate = coordinate.into();
         if !self.size.contains(coordinate) {
@@ -42,22 +40,22 @@ impl Chunk {
         Some(self.list[index])
     }
 
-    /// Get the [`Block`] at the **absolute** [`Coordinate`]
+    /// Get the [`Block`] at the **worldspace** [`Coordinate`]
     pub fn get_absolute(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
         self.get(coordinate.into() - self.origin)
     }
 
-    /// Get the origin [`Coordinate`]
+    /// Get the origin [`Coordinate`].
     pub fn origin(&self) -> Coordinate {
         self.origin
     }
 
-    /// Get the 3D size of the chunk
+    /// Get the 3D size of the chunk.
     pub fn size(&self) -> Size {
         self.size
     }
 
-    /// Create an iterator over the blocks in the chunk
+    /// Create an iterator over the blocks in the chunk.
     pub fn iter(&self) -> Iter {
         Iter::from(self)
     }
@@ -77,20 +75,24 @@ impl<'a> IntoIterator for &'a Chunk {
     }
 }
 
-/// An iterator over the blocks in a [`Chunk`]
+/// An iterator over the blocks in a [`Chunk`].
+///
+/// Holds a shared reference to the original [`Chunk`].
 pub struct Iter<'a> {
     chunk: &'a Chunk,
     index: usize,
 }
 
-/// An iterated item in a [`Chunk`]
+/// An iterated item in a [`Chunk`].
+///
+/// Holds a reference to the original [`Chunk`].
 pub struct IterItem<'a> {
     chunk: &'a Chunk,
     index: usize,
 }
 
 impl<'a> Iter<'a> {
-    /// Create an iterator over the blocks in a [`Chunk`]
+    // TODO(refactor): Remove and inline in `Chunk::iter`
     pub fn from(chunk: &'a Chunk) -> Self {
         Self { chunk, index: 0 }
     }
@@ -114,12 +116,12 @@ impl<'a> Iterator for Iter<'a> {
 }
 
 impl<'a> IterItem<'a> {
-    /// Get a reference to the entire [`Chunk`]
+    /// Get a shared reference to the entire [`Chunk`].
     pub fn chunk(&self) -> &'a Chunk {
         self.chunk
     }
 
-    /// Get the [`Block`] corresponding to the [`Chunk`] item
+    /// Get the [`Block`] corresponding to the [`Chunk`] item.
     pub fn block(&self) -> Block {
         *self
             .chunk
@@ -128,12 +130,12 @@ impl<'a> IterItem<'a> {
             .expect("should be valid index in chunk")
     }
 
-    /// Get the **relative** [`Coordinate`] corresponding to the [`Chunk`] item
+    /// Get the **offset** [`Coordinate`] corresponding to the [`Chunk`] item.
     pub fn position_relative(&self) -> Coordinate {
         self.chunk.size.index_to_coordinate(self.index)
     }
 
-    /// Get the **absolute** [`Coordinate`] corresponding to the [`Chunk`] item
+    /// Get the **worldspace** [`Coordinate`] corresponding to the [`Chunk`] item.
     pub fn position_absolute(&self) -> Coordinate {
         self.position_relative() + self.chunk.origin
     }
@@ -143,7 +145,7 @@ impl<'a> fmt::Debug for IterItem<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "<Chunk item {} {}>",
+            "<Chunk item {:?} {:?}>",
             self.position_relative(),
             self.block(),
         )

@@ -4,7 +4,7 @@ use crate::{Coordinate, Coordinate2D};
 
 /// 3D size in blocks.
 ///
-/// Used by [`Chunk`]
+/// Used by [`Chunk`].
 #[derive(Clone, Copy)]
 pub struct Size {
     pub x: u32,
@@ -14,7 +14,7 @@ pub struct Size {
 
 /// 2D size in blocks.
 ///
-/// Used by [`HeightMap`]
+/// Used by [`Heights`].
 #[derive(Clone, Copy)]
 pub struct Size2D {
     pub x: u32,
@@ -26,7 +26,7 @@ impl Size {
         Self { x, y, z }
     }
 
-    /// Returns `true` if the **relative** [`Coordinate`] is within the size
+    /// Returns `true` if the **offset** [`Coordinate`] is within the size.
     pub fn contains(&self, coordinate: impl Into<Coordinate>) -> bool {
         let coordinate = coordinate.into();
         (0..self.x as i32).contains(&coordinate.x)
@@ -34,8 +34,10 @@ impl Size {
             && (0..self.z as i32).contains(&coordinate.z)
     }
 
-    /// Convert a [`Chunk`] index to a **relative** [`Coordinate`]
-    pub fn index_to_coordinate(&self, index: usize) -> Coordinate {
+    /// Convert a [`Chunk`] index to an **offset** [`Coordinate`].
+    ///
+    /// [`Chunk`]: crate::Chunk
+    pub(crate) fn index_to_coordinate(&self, index: usize) -> Coordinate {
         let z = (index % self.z as usize) as i32;
         let xy = index / self.z as usize;
         let x = (xy % self.x as usize) as i32;
@@ -43,8 +45,10 @@ impl Size {
         Coordinate { x, y, z }
     }
 
-    /// Convert a **relative** [`Coordinate`] to a [`Chunk`] index
-    pub fn coordinate_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
+    /// Convert an **offset** [`Coordinate`] to a [`Chunk`] index.
+    ///
+    /// [`Chunk`]: crate::Chunk
+    pub(crate) fn coordinate_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
         let coordinate = coordinate.into();
         let [x, y, z] = [
             coordinate.x as usize,
@@ -60,21 +64,25 @@ impl Size2D {
         Self { x, z }
     }
 
-    /// Returns `true` if the **relative** [`Coordinate2D`] is within the size
+    /// Returns `true` if the **offset** [`Coordinate2D`] is within the size.
     pub fn contains(self, coordinate: impl Into<Coordinate2D>) -> bool {
         let coordinate = coordinate.into();
         (0..self.x as i32).contains(&coordinate.x) && (0..self.z as i32).contains(&coordinate.z)
     }
 
-    /// Convert a [`HeightMap`] index to a **relative** [`Coordinate2D`]
-    pub fn index_to_coordinate(&self, index: usize) -> Coordinate2D {
+    /// Convert a [`Heights`] index to an **offset** [`Coordinate2D`].
+    ///
+    /// [`Heights`]: crate::Heights
+    pub(crate) fn index_to_coordinate(&self, index: usize) -> Coordinate2D {
         let z = (index % self.z as usize) as i32;
         let x = (index / self.z as usize) as i32;
         Coordinate2D { x, z }
     }
 
-    /// Convert a **relative** [`Coordinate2D`] to a [`HeightMap`] index
-    pub fn coordinate_to_index(&self, coordinate: impl Into<Coordinate2D>) -> usize {
+    /// Convert an **offset** [`Coordinate2D`] to a [`Heights`] index.
+    ///
+    /// [`Heights`]: crate::Heights
+    pub(crate) fn coordinate_to_index(&self, coordinate: impl Into<Coordinate2D>) -> usize {
         let coordinate = coordinate.into();
         coordinate.z as usize + coordinate.x as usize * self.z as usize
     }

@@ -2,6 +2,7 @@ use std::fmt;
 
 use crate::{Block, Coordinate};
 
+/// A request argument which is lazily serialized with [`fmt::Display`].
 pub enum Argument<'a> {
     Coordinate(Coordinate),
     Block(Block),

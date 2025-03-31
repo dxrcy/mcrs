@@ -1,16 +1,17 @@
 use std::fmt;
 
-/// A Minecraft block, including `id` and `modifier`
+/// A Minecraft block, including `id` and `modifier`.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Block {
-    /// Block identifier. Eg. 'Andesite' has id `1` (`1:5`)
+    // Fields must be larger than `u8` to hold newer blocks
+    /// Block identifier. Eg. 'Andesite' has id `1` (`1:5`).
     pub id: u32,
-    /// Block modifier. Eg. 'Andesite' has modifier `5` (`1:5`)
+    /// Block modifier. Eg. 'Andesite' has modifier `5` (`1:5`).
     pub modifier: u32,
 }
 
 impl Block {
-    /// Create a new `Block`
+    /// Note that many [`Block`]s are predefined as associated constants.
     pub const fn new(id: u32, modifier: u32) -> Self {
         Self { id, modifier }
     }
@@ -40,7 +41,7 @@ macro_rules! blocks {
         impl Block {
             /// Get the non-standard name for the block.
             ///
-            /// Always corresponds to names of block constants, like `Block::ANDESITE`
+            /// Always corresponds to names of block constants, like `Block::ANDESITE`.
             pub fn get_name(&self) -> Option<&'static str> {
                 match (self.id, self.modifier) {
                     $( ($id, $modifier) => Some(stringify!($name)), )*

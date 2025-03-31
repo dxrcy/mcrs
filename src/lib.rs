@@ -10,9 +10,9 @@
 //! mc.post_to_chat("Hello world!").unwrap();
 //! ```
 
-/// Types related to [`Chunk`]
+/// Types related to [`Chunk`].
 pub mod chunk;
-/// Types related to [`HeightMap`]
+/// Types related to [`Heights`].
 pub mod heights;
 
 mod argument;

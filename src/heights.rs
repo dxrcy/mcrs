@@ -3,7 +3,7 @@ use std::{cmp::Ordering, fmt};
 use crate::{Coordinate2D, Size2D};
 
 /// Stores a 2D area of the world with the `y`-values of the highest solid block
-/// at each (`x`, `z`)
+/// in each column (`x`, `z` coordinate).
 #[derive(Clone)]
 pub struct Heights {
     list: Vec<i32>,
@@ -26,7 +26,7 @@ impl Heights {
         }
     }
 
-    /// Get the height value at the **relative** [`Coordinate2D`]
+    /// Get the height value at the **offset** [`Coordinate2D`].
     pub fn get(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
         let coordinate = coordinate.into();
         if !self.size.contains(coordinate) {
@@ -40,22 +40,22 @@ impl Heights {
         Some(self.list[index])
     }
 
-    /// Get the height value at the **absolute** [`Coordinate2D`]
+    /// Get the height value at the **worldspace** [`Coordinate2D`].
     pub fn get_absolute(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
         self.get(coordinate.into() - self.origin)
     }
 
-    /// Get the origin [`Coordinate2D`]
+    /// Get the origin [`Coordinate2D`].
     pub fn origin(&self) -> Coordinate2D {
         self.origin
     }
 
-    /// Get the 2D size of the height map
+    /// Get the 2D size of the area.
     pub fn size(&self) -> Size2D {
         self.size
     }
 
-    /// Create an iterator over the height values in the height map
+    /// Create an iterator over the height values in the area.
     pub fn iter(&self) -> Iter {
         Iter::from(self)
     }
@@ -75,20 +75,24 @@ impl<'a> IntoIterator for &'a Heights {
     }
 }
 
-/// An iterator over the height values in a [`HeightMap`]
+/// An iterator over the height values in a [`Heights`].
+///
+/// Holds a shared reference to the original [`Heights`].
 pub struct Iter<'a> {
     height_map: &'a Heights,
     index: usize,
 }
 
-/// An iterated item in a [`HeightMap`]
+/// An iterated item in a [`Heights`].
+///
+/// Holds a shared reference to the original [`Heights`].
 pub struct IterItem<'a> {
     height_map: &'a Heights,
     index: usize,
 }
 
 impl<'a> Iter<'a> {
-    /// Create an iterator over the height values in a [`HeightMap`]
+    // TODO(refactor): Remove and inline in `Heights::iter`
     pub fn from(chunk: &'a Heights) -> Self {
         Self {
             height_map: chunk,
@@ -115,12 +119,12 @@ impl<'a> Iterator for Iter<'a> {
 }
 
 impl<'a> IterItem<'a> {
-    /// Get a reference to the entire [`HeightMap`]
+    /// Get a shared reference to the entire [`Heights`].
     pub fn height_map(&self) -> &'a Heights {
         self.height_map
     }
 
-    /// Get the height value corresponding to the [`HeightMap`] item
+    /// Get the height value corresponding to the [`Heights`] item.
     pub fn height(&self) -> i32 {
         *self
             .height_map
@@ -129,12 +133,12 @@ impl<'a> IterItem<'a> {
             .expect("should be valid index in chunk")
     }
 
-    /// Get the **relative** [`Coordinate2D`] corresponding to the [`HeightMap`] item
+    /// Get the **offset** [`Coordinate2D`] corresponding to the [`Heights`] item.
     pub fn position_relative(&self) -> Coordinate2D {
         self.height_map.size.index_to_coordinate(self.index)
     }
 
-    /// Get the **absolute** [`Coordinate2D`] corresponding to the [`HeightMap`] item
+    /// Get the **worldspace** [`Coordinate2D`] corresponding to the [`Heights`] item.
     pub fn position_absolute(&self) -> Coordinate2D {
         self.position_relative() + self.height_map.origin
     }
