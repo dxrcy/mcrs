@@ -24,11 +24,13 @@ impl fmt::Debug for Block {
 
 impl fmt::Display for Block {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.get_name() {
-            Some(name) => write!(f, "{}", name)?,
-            None => write!(f, "[UNKNOWN]")?,
-        }
-        write!(f, " ({}:{})", self.id, self.modifier)?;
+        write!(
+            f,
+            "{} ({}:{})",
+            self.get_display_name(),
+            self.id,
+            self.modifier
+        )?;
         Ok(())
     }
 }
@@ -38,14 +40,23 @@ macro_rules! blocks {
         impl Block {
             /// Get the non-standard name for the block.
             ///
-            /// Corresponds to names of block constants, like `Block::ANDESITE`
+            /// Always corresponds to names of block constants, like `Block::ANDESITE`
             pub fn get_name(&self) -> Option<&'static str> {
                 match (self.id, self.modifier) {
-                    // Exact match
                     $( ($id, $modifier) => Some(stringify!($name)), )*
-                    // No modifier matched, use identifier:0 as fallback
-                    $( ($id, _) if $modifier == 0 => Some(concat!(stringify!($name), "?")), )*
                     _ => None,
+                }
+            }
+
+            /// Gets the non-standard display name for the block.
+            ///
+            /// If identifier matches but no modifier does, prints name of `id:0` followed by `?`.
+            /// If identifier and modifier does not match, prints `UNKNOWN`.
+            fn get_display_name(&self) -> &'static str {
+                match (self.id, self.modifier) {
+                    $( ($id, $modifier) => stringify!($name), )*
+                    $( ($id, _) if $modifier == 0 => concat!(stringify!($name), "?"), )*
+                    _ => "UNKNOWN",
                 }
             }
 
