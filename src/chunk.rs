@@ -50,6 +50,11 @@ impl Chunk {
         Some(self.list[index])
     }
 
+    /// Get the [`Block`] at the **absolute** [`Coordinate`]
+    pub fn get_absolute(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
+        self.get(coordinate.into() - self.origin)
+    }
+
     /// Get the origin [`Coordinate`]
     pub fn origin(&self) -> Coordinate {
         self.origin

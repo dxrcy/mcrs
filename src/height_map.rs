@@ -43,6 +43,11 @@ impl HeightMap {
         Some(self.list[index])
     }
 
+    /// Get the height value at the **absolute** `y`-agnostic [`Coordinate`]
+    pub fn get_absolute(&self, coordinate: impl Into<Coordinate>) -> Option<i32> {
+        self.get(coordinate.into() - self.origin)
+    }
+
     /// Get the origin [`Coordinate`]
     pub fn origin(&self) -> Coordinate {
         self.origin
