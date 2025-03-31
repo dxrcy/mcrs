@@ -41,7 +41,10 @@ macro_rules! blocks {
             /// Corresponds to names of block constants, like `Block::ANDESITE`
             pub fn get_name(&self) -> Option<&'static str> {
                 match (self.id, self.modifier) {
+                    // Exact match
                     $( ($id, $modifier) => Some(stringify!($name)), )*
+                    // No modifier matched, use identifier:0 as fallback
+                    $( ($id, _) if $modifier == 0 => Some(concat!(stringify!($name), "?")), )*
                     _ => None,
                 }
             }

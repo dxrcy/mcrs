@@ -1,6 +1,8 @@
 use mcrs::{Block, Connection, Coordinate};
 
 fn main() {
+    println!("{}", Block::new(1, 8));
+
     let mut mc = Connection::new().expect("Failed to connect");
 
     println!("{:?}", mc);
