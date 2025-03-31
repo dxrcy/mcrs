@@ -1,9 +1,9 @@
-use std::{
-    io::{self, BufRead, BufReader, Write},
-    net::{TcpStream, ToSocketAddrs},
-};
+use std::io::{self, BufRead, BufReader, Write};
+use std::net::{TcpStream, ToSocketAddrs};
 
-use crate::{command::Command, heights::Heights, response::Response, Block, Chunk, Coordinate};
+use crate::argument::Argument;
+use crate::response::Response;
+use crate::{Block, Chunk, Coordinate, Heights};
 
 type Result<T> = io::Result<T>;
 
@@ -30,9 +30,20 @@ impl Connection {
         Ok(Self { stream })
     }
 
-    /// Serialize and send a command to the server
-    fn send(&mut self, command: Command) -> Result<()> {
-        self.stream.write_all(command.build().as_bytes())?;
+    /// Format and send a command to the server
+    fn send<'a>(
+        &mut self,
+        command: &'static str,
+        arguments: impl AsRef<[Argument<'a>]>,
+    ) -> Result<()> {
+        self.stream.write_fmt(format_args!("{}(", command))?;
+        for (i, arg) in arguments.as_ref().into_iter().enumerate() {
+            if i > 0 {
+                self.stream.write_fmt(format_args!(","))?;
+            }
+            self.stream.write_fmt(format_args!("{}", arg))?;
+        }
+        self.stream.write_fmt(format_args!(")\n"))?;
         Ok(())
     }
 
@@ -46,7 +57,7 @@ impl Connection {
 
     /// Sends a message to the in-game chat, does not require a joined player
     pub fn post_to_chat(&mut self, message: impl AsRef<str>) -> Result<()> {
-        self.send(Command::new("chat.post").arg_string(message))
+        self.send("chat.post", [Argument::String(message.as_ref())])
     }
 
     /// Performs an in-game Minecraft command. Players have to exist on the
@@ -54,13 +65,13 @@ impl Connection {
     ///
     /// [ELCI]: https://github.com/rozukke/elci
     pub fn do_command(&mut self, command: impl AsRef<str>) -> Result<()> {
-        self.send(Command::new("player.doCommand").arg_string(command))
+        self.send("player.doCommand", [Argument::String(command.as_ref())])
     }
 
     /// Sets player position (block position of lower half of playermodel) to
     /// specified [`Coordinate`]
     pub fn set_player_position(&mut self, position: impl Into<Coordinate>) -> Result<()> {
-        self.send(Command::new("player.setPos").arg_coordinate(position.into()))
+        self.send("player.setPos", [Argument::Coordinate(position.into())])
     }
 
     /// Sets player position to be one above specified tile (i.e. tile = block
@@ -74,7 +85,7 @@ impl Connection {
     /// Returns a [`Coordinate`] representing player position (block position of
     /// lower half of playermodel)
     pub fn get_player_position(&mut self) -> Result<Coordinate> {
-        self.send(Command::new("player.getPos"))?;
+        self.send("player.getPos", [])?;
         let response = self.recv()?;
         let coord = response.as_coordinate().expect("malformed server response");
         Ok(coord)
@@ -91,15 +102,20 @@ impl Connection {
     /// Sets block at [`Coordinate`] to specified [`Block`]
     pub fn set_block(&mut self, location: impl Into<Coordinate>, block: Block) -> Result<()> {
         self.send(
-            Command::new("world.setBlock")
-                .arg_coordinate(location.into())
-                .arg_block(block),
+            "world.setBlock",
+            [
+                Argument::Coordinate(location.into()),
+                Argument::Block(block),
+            ],
         )
     }
 
     /// Returns [`Block`] object from specified [`Coordinate`]
     pub fn get_block(&mut self, location: impl Into<Coordinate>) -> Result<Block> {
-        self.send(Command::new("world.getBlockWithData").arg_coordinate(location.into()))?;
+        self.send(
+            "world.getBlockWithData",
+            [Argument::Coordinate(location.into())],
+        )?;
         let response = self.recv()?;
         let block = response.as_block().expect("malformed server response");
         Ok(block)
@@ -115,10 +131,12 @@ impl Connection {
         block: Block,
     ) -> Result<()> {
         self.send(
-            Command::new("world.setBlocks")
-                .arg_coordinate(a.into())
-                .arg_coordinate(b.into())
-                .arg_block(block),
+            "world.setBlocks",
+            [
+                Argument::Coordinate(a.into()),
+                Argument::Coordinate(b.into()),
+                Argument::Block(block),
+            ],
         )
     }
 
@@ -132,9 +150,11 @@ impl Connection {
         let a = a.into();
         let b = b.into();
         self.send(
-            Command::new("world.getBlocksWithData")
-                .arg_coordinate(a)
-                .arg_coordinate(b),
+            "world.getBlocksWithData",
+            [
+                Argument::Coordinate(a.into()),
+                Argument::Coordinate(b.into()),
+            ],
         )?;
         let response = self.recv()?;
         let list = response.as_block_list().expect("malformed server response");
@@ -151,7 +171,10 @@ impl Connection {
     ///
     /// [`get_heights`]: Connection::get_heights
     pub fn get_height(&mut self, x: i32, z: i32) -> Result<i32> {
-        self.send(Command::new("world.getHeight").arg_int(x).arg_int(z))?;
+        self.send(
+            "world.getHeight",
+            [Argument::Integer(x), Argument::Integer(z)],
+        )?;
         let response = self.recv()?;
         let height = response.as_integer().expect("malformed server response");
         Ok(height)
@@ -169,11 +192,13 @@ impl Connection {
         let a = a.into();
         let b = b.into();
         self.send(
-            Command::new("world.getHeights")
-                .arg_int(a.x)
-                .arg_int(a.z)
-                .arg_int(b.x)
-                .arg_int(b.z),
+            "world.getHeights",
+            [
+                Argument::Integer(a.x),
+                Argument::Integer(a.z),
+                Argument::Integer(b.x),
+                Argument::Integer(b.z),
+            ],
         )?;
         let response = self.recv()?;
         let list = response.as_integer_list();

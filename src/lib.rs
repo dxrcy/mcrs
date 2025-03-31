@@ -15,8 +15,8 @@ pub mod chunk;
 /// Types related to [`HeightMap`]
 pub mod heights;
 
+mod argument;
 mod block;
-mod command;
 mod connection;
 mod coordinate;
 mod response;
