@@ -5,6 +5,8 @@ use crate::{Coordinate, Coordinate2D};
 /// 3D size in blocks.
 ///
 /// Used by [`Chunk`].
+///
+/// [`Chunk`]: crate::Chunk
 #[derive(Clone, Copy)]
 pub struct Size {
     pub x: u32,
@@ -15,6 +17,8 @@ pub struct Size {
 /// 2D size in blocks.
 ///
 /// Used by [`Heights`].
+///
+/// [`Heights`]: crate::Heights
 #[derive(Clone, Copy)]
 pub struct Size2D {
     pub x: u32,
