@@ -1,5 +1,9 @@
-Coordinate2D
+feat: Coordinate2D
 
-replace 'absolute'/'relative' with 'worldspace'/'offset' ?
+feat: implement coordinate + size
 
-implement coordinate + size
+chore: replace 'absolute'/'relative' with 'worldspace'/'offset' ?
+lint: make doc comments consistent
+
+feat(test): convert `main.rs` to integration test
+
