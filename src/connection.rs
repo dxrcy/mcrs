@@ -3,7 +3,7 @@ use std::net::{TcpStream, ToSocketAddrs};
 
 use crate::argument::Argument;
 use crate::response::Response;
-use crate::{Block, Chunk, Coordinate, Heights};
+use crate::{Block, Chunk, Coordinate, Coordinate2D, Heights};
 
 type Result<T> = io::Result<T>;
 
@@ -124,42 +124,42 @@ impl Connection {
     }
 
     /// Sets a cuboid of blocks to all be the specified [`Block`], with the corners of the cuboid
-    /// specified by [`Coordinate`]s `a` and `b` (in any order).
+    /// specified by [`Coordinate`]s `corner_a` and `corner_b` (in any order).
     pub fn set_blocks(
         &mut self,
-        a: impl Into<Coordinate>,
-        b: impl Into<Coordinate>,
+        corner_a: impl Into<Coordinate>,
+        corner_b: impl Into<Coordinate>,
         block: Block,
     ) -> Result<()> {
         self.send(
             "world.setBlocks",
             [
-                Argument::Coordinate(a.into()),
-                Argument::Coordinate(b.into()),
+                Argument::Coordinate(corner_a.into()),
+                Argument::Coordinate(corner_b.into()),
                 Argument::Block(block),
             ],
         )
     }
 
-    /// Returns a [`Chunk`] of the [`Block`]s of cuboid specified by [`Coordinate`]s `a` and `b`
-    /// (in any order)
+    /// Returns a [`Chunk`] of the [`Block`]s of cuboid specified by [`Coordinate`]s `corner_a` and
+    /// `corner_b` (in any order)
     pub fn get_blocks(
         &mut self,
-        a: impl Into<Coordinate>,
-        b: impl Into<Coordinate>,
+        corner_a: impl Into<Coordinate>,
+        corner_b: impl Into<Coordinate>,
     ) -> Result<Chunk> {
-        let a = a.into();
-        let b = b.into();
+        let corner_a = corner_a.into();
+        let corner_b = corner_b.into();
         self.send(
             "world.getBlocksWithData",
             [
-                Argument::Coordinate(a.into()),
-                Argument::Coordinate(b.into()),
+                Argument::Coordinate(corner_a),
+                Argument::Coordinate(corner_b),
             ],
         )?;
         let response = self.recv()?;
         let list = response.as_block_list().expect("malformed server response");
-        let chunk = Chunk::new(a, b, list);
+        let chunk = Chunk::new(corner_a, corner_b, list);
         Ok(chunk)
     }
 
@@ -168,11 +168,8 @@ impl Connection {
     /// **DO NOT USE FOR LARGE AREAS, IT WILL BE VERY SLOW** -- use [`get_heights`] instead.
     ///
     /// [`get_heights`]: Connection::get_heights
-    pub fn get_height(&mut self, x: i32, z: i32) -> Result<i32> {
-        self.send(
-            "world.getHeight",
-            [Argument::Integer(x), Argument::Integer(z)],
-        )?;
+    pub fn get_height(&mut self, location: impl Into<Coordinate2D>) -> Result<i32> {
+        self.send("world.getHeight", [Argument::Coordinate2D(location.into())])?;
         let response = self.recv()?;
         let height = response.as_integer().expect("malformed server response");
         Ok(height)
@@ -184,23 +181,21 @@ impl Connection {
     /// [`get_height`]: Connection::get_height
     pub fn get_heights(
         &mut self,
-        a: impl Into<Coordinate>,
-        b: impl Into<Coordinate>,
+        corner_a: impl Into<Coordinate2D>,
+        corner_b: impl Into<Coordinate2D>,
     ) -> Result<Heights> {
-        let a = a.into();
-        let b = b.into();
+        let corner_a = corner_a.into();
+        let corner_b = corner_b.into();
         self.send(
             "world.getHeights",
             [
-                Argument::Integer(a.x),
-                Argument::Integer(a.z),
-                Argument::Integer(b.x),
-                Argument::Integer(b.z),
+                Argument::Coordinate2D(corner_a),
+                Argument::Coordinate2D(corner_b),
             ],
         )?;
         let response = self.recv()?;
         let list = response.as_integer_list();
-        let height_map = Heights::new(a, b, list);
+        let height_map = Heights::new(corner_a, corner_b, list);
         Ok(height_map)
     }
 }

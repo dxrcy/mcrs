@@ -1,12 +1,12 @@
 use std::fmt;
 
-use crate::{Block, Coordinate};
+use crate::{Block, Coordinate, Coordinate2D};
 
 /// A request argument which is lazily serialized with [`fmt::Display`].
 pub enum Argument<'a> {
     Coordinate(Coordinate),
+    Coordinate2D(Coordinate2D),
     Block(Block),
-    Integer(i32),
     String(&'a str),
 }
 
@@ -16,11 +16,11 @@ impl fmt::Display for Argument<'_> {
             Self::Coordinate(coordinate) => {
                 write!(f, "{},{},{}", coordinate.x, coordinate.y, coordinate.z)?;
             }
+            Self::Coordinate2D(coordinate) => {
+                write!(f, "{},{}", coordinate.x, coordinate.z)?;
+            }
             Self::Block(block) => {
                 write!(f, "{},{}", block.id, block.modifier)?;
-            }
-            Self::Integer(integer) => {
-                write!(f, "{}", integer)?;
             }
             Self::String(string) => {
                 for ch in string.chars() {

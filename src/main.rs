@@ -36,7 +36,7 @@ fn main() {
     println!("Block: {:?}", block);
 
     let height = mc
-        .get_height(player.x, player.z)
+        .get_height((player.x, player.z))
         .expect("Failed to get height");
     println!("Height: {:?}", height);
 
