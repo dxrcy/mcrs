@@ -5,13 +5,13 @@ use crate::{Coordinate2D, Size2D};
 /// Stores a 2D area of the world with the `y`-values of the highest solid block
 /// at each (`x`, `z`)
 #[derive(Clone)]
-pub struct HeightMap {
+pub struct Heights {
     list: Vec<i32>,
     origin: Coordinate2D,
     size: Size2D,
 }
 
-impl HeightMap {
+impl Heights {
     pub(crate) fn new(
         a: impl Into<Coordinate2D>,
         b: impl Into<Coordinate2D>,
@@ -61,13 +61,13 @@ impl HeightMap {
     }
 }
 
-impl fmt::Debug for HeightMap {
+impl fmt::Debug for Heights {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "<HeightMap {:?}>", self.size)
     }
 }
 
-impl<'a> IntoIterator for &'a HeightMap {
+impl<'a> IntoIterator for &'a Heights {
     type Item = IterItem<'a>;
     type IntoIter = Iter<'a>;
     fn into_iter(self) -> Self::IntoIter {
@@ -77,19 +77,19 @@ impl<'a> IntoIterator for &'a HeightMap {
 
 /// An iterator over the height values in a [`HeightMap`]
 pub struct Iter<'a> {
-    height_map: &'a HeightMap,
+    height_map: &'a Heights,
     index: usize,
 }
 
 /// An iterated item in a [`HeightMap`]
 pub struct IterItem<'a> {
-    height_map: &'a HeightMap,
+    height_map: &'a Heights,
     index: usize,
 }
 
 impl<'a> Iter<'a> {
     /// Create an iterator over the height values in a [`HeightMap`]
-    pub fn from(chunk: &'a HeightMap) -> Self {
+    pub fn from(chunk: &'a Heights) -> Self {
         Self {
             height_map: chunk,
             index: 0,
@@ -116,7 +116,7 @@ impl<'a> Iterator for Iter<'a> {
 
 impl<'a> IterItem<'a> {
     /// Get a reference to the entire [`HeightMap`]
-    pub fn height_map(&self) -> &'a HeightMap {
+    pub fn height_map(&self) -> &'a Heights {
         self.height_map
     }
 

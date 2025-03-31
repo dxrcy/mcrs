@@ -3,9 +3,7 @@ use std::{
     net::{TcpStream, ToSocketAddrs},
 };
 
-use crate::{
-    command::Command, height_map::HeightMap, response::Response, Block, Chunk, Coordinate,
-};
+use crate::{command::Command, heights::Heights, response::Response, Block, Chunk, Coordinate};
 
 type Result<T> = io::Result<T>;
 
@@ -167,7 +165,7 @@ impl Connection {
         &mut self,
         a: impl Into<Coordinate>,
         b: impl Into<Coordinate>,
-    ) -> Result<HeightMap> {
+    ) -> Result<Heights> {
         let a = a.into();
         let b = b.into();
         self.send(
@@ -179,7 +177,7 @@ impl Connection {
         )?;
         let response = self.recv()?;
         let list = response.as_integer_list();
-        let height_map = HeightMap::new(a, b, list);
+        let height_map = Heights::new(a, b, list);
         Ok(height_map)
     }
 }

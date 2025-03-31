@@ -13,7 +13,7 @@
 /// Types related to [`Chunk`]
 pub mod chunk;
 /// Types related to [`HeightMap`]
-pub mod height_map;
+pub mod heights;
 
 mod block;
 mod command;
@@ -26,5 +26,5 @@ pub use block::Block;
 pub use chunk::Chunk;
 pub use connection::Connection;
 pub use coordinate::{Coordinate, Coordinate2D};
-pub use height_map::HeightMap;
+pub use heights::Heights;
 pub use size::{Size, Size2D};
