@@ -60,6 +60,14 @@ impl Coordinate2D {
             z: (self.z - other.z).unsigned_abs() + 1,
         }
     }
+
+    pub fn with_height(self, height: i32) -> Coordinate {
+        Coordinate {
+            x: self.x,
+            y: height,
+            z: self.z,
+        }
+    }
 }
 
 impl fmt::Display for Coordinate {
