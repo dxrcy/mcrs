@@ -2,7 +2,9 @@ use std::fmt;
 
 use crate::Coordinate;
 
-/// 3D size of a [`Chunk`]
+/// 3D size in blocks.
+///
+/// Used by [`Chunk`]
 #[derive(Clone, Copy)]
 pub struct Size {
     pub x: u32,
@@ -10,7 +12,9 @@ pub struct Size {
     pub z: u32,
 }
 
-/// 2D size of a [`HeightMap`]
+/// 2D size in blocks.
+///
+/// Used by [`HeightMap`]
 #[derive(Clone, Copy)]
 pub struct Size2D {
     pub x: u32,
@@ -20,6 +24,14 @@ pub struct Size2D {
 impl Size {
     pub fn new(x: u32, y: u32, z: u32) -> Self {
         Self { x, y, z }
+    }
+
+    /// Returns `true` if the **relative** [`Coordinate`] is within the size
+    pub fn contains(&self, coordinate: impl Into<Coordinate>) -> bool {
+        let coordinate = coordinate.into();
+        (0..self.x as i32).contains(&coordinate.x)
+            && (0..self.y as i32).contains(&coordinate.y)
+            && (0..self.z as i32).contains(&coordinate.z)
     }
 
     /// Convert a [`Chunk`] index to a **relative** [`Coordinate`]
@@ -41,15 +53,6 @@ impl Size {
         ];
         z + (x + y * self.x as usize) * self.z as usize
     }
-
-    /// Returns `true` if the **relative** [`Coordinate`] is within the
-    /// [`Chunk`] size
-    pub fn contains(&self, coordinate: impl Into<Coordinate>) -> bool {
-        let coordinate = coordinate.into();
-        (0..self.x as i32).contains(&coordinate.x)
-            && (0..self.y as i32).contains(&coordinate.y)
-            && (0..self.z as i32).contains(&coordinate.z)
-    }
 }
 
 impl Size2D {
@@ -62,6 +65,12 @@ impl Size2D {
             x: size.x,
             z: size.z,
         }
+    }
+
+    /// Returns `true` if the **relative** `y`-agnostic [`Coordinate`] is within the size
+    pub fn contains(self, coordinate: impl Into<Coordinate>) -> bool {
+        let coordinate = coordinate.into();
+        (0..self.x as i32).contains(&coordinate.x) && (0..self.z as i32).contains(&coordinate.z)
     }
 
     /// Convert a [`HeightMap`] index to a **relative** `y`-agnostic
@@ -77,13 +86,6 @@ impl Size2D {
     pub fn coordinate_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
         let coordinate = coordinate.into();
         coordinate.z as usize + coordinate.x as usize * self.z as usize
-    }
-
-    /// Returns `true` if the **relative** `y`-agnostic [`Coordinate`] is within
-    /// the [`HeightMap`] size
-    pub fn contains(self, coordinate: impl Into<Coordinate>) -> bool {
-        let coordinate = coordinate.into();
-        (0..self.x as i32).contains(&coordinate.x) && (0..self.z as i32).contains(&coordinate.z)
     }
 }
 
