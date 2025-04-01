@@ -46,17 +46,17 @@ impl Heights {
     }
 
     /// Get the origin [`Coordinate2D`].
-    pub fn origin(&self) -> Coordinate2D {
+    pub const fn origin(&self) -> Coordinate2D {
         self.origin
     }
 
     /// Get the 2D size of the area.
-    pub fn size(&self) -> Size2D {
+    pub const fn size(&self) -> Size2D {
         self.size
     }
 
     /// Create an iterator over the height values in the area.
-    pub fn iter(&self) -> Iter {
+    pub const fn iter(&self) -> Iter {
         Iter::from(self)
     }
 }
@@ -93,7 +93,7 @@ pub struct IterItem<'a> {
 
 impl<'a> Iter<'a> {
     // TODO(refactor): Remove and inline in `Heights::iter`
-    pub fn from(chunk: &'a Heights) -> Self {
+    pub const fn from(chunk: &'a Heights) -> Self {
         Self {
             height_map: chunk,
             index: 0,
@@ -120,7 +120,7 @@ impl<'a> Iterator for Iter<'a> {
 
 impl<'a> IterItem<'a> {
     /// Get a shared reference to the entire [`Heights`].
-    pub fn height_map(&self) -> &'a Heights {
+    pub const fn height_map(&self) -> &'a Heights {
         self.height_map
     }
 
@@ -134,7 +134,7 @@ impl<'a> IterItem<'a> {
     }
 
     /// Get the **offset** [`Coordinate2D`] corresponding to the [`Heights`] item.
-    pub fn position_offset(&self) -> Coordinate2D {
+    pub const fn position_offset(&self) -> Coordinate2D {
         self.height_map.size.index_to_offset(self.index)
     }
 

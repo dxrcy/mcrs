@@ -2,7 +2,7 @@ use std::{fmt, ops};
 
 use crate::{Size, Size2D};
 
-/// An absolute or relative coordinate in the Minecraft world
+/// A worldspace or offset coordinate in the Minecraft world
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Coordinate {
     pub x: i32,
@@ -10,7 +10,7 @@ pub struct Coordinate {
     pub z: i32,
 }
 
-/// An absolute or relative coordinate in the Minecraft world, with no y-value
+/// A worldspace or offset coordinate in the Minecraft world, with no y-value
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Coordinate2D {
     pub x: i32,
@@ -32,7 +32,7 @@ impl Coordinate {
         }
     }
 
-    pub fn size_between(self, other: Self) -> Size {
+    pub const fn size_between(self, other: Self) -> Size {
         Size {
             x: (self.x - other.x).unsigned_abs() + 1,
             y: (self.y - other.y).unsigned_abs() + 1,
@@ -54,14 +54,14 @@ impl Coordinate2D {
         }
     }
 
-    pub fn size_between(self, other: Self) -> Size2D {
+    pub const fn size_between(self, other: Self) -> Size2D {
         Size2D {
             x: (self.x - other.x).unsigned_abs() + 1,
             z: (self.z - other.z).unsigned_abs() + 1,
         }
     }
 
-    pub fn with_height(self, height: i32) -> Coordinate {
+    pub const fn with_height(self, height: i32) -> Coordinate {
         Coordinate {
             x: self.x,
             y: height,

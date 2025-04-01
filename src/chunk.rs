@@ -46,17 +46,17 @@ impl Chunk {
     }
 
     /// Get the origin [`Coordinate`].
-    pub fn origin(&self) -> Coordinate {
+    pub const fn origin(&self) -> Coordinate {
         self.origin
     }
 
     /// Get the 3D size of the chunk.
-    pub fn size(&self) -> Size {
+    pub const fn size(&self) -> Size {
         self.size
     }
 
     /// Create an iterator over the blocks in the chunk.
-    pub fn iter(&self) -> Iter {
+    pub const fn iter(&self) -> Iter {
         Iter::from(self)
     }
 }
@@ -93,7 +93,7 @@ pub struct IterItem<'a> {
 
 impl<'a> Iter<'a> {
     // TODO(refactor): Remove and inline in `Chunk::iter`
-    pub fn from(chunk: &'a Chunk) -> Self {
+    pub const fn from(chunk: &'a Chunk) -> Self {
         Self { chunk, index: 0 }
     }
 }
@@ -117,7 +117,7 @@ impl<'a> Iterator for Iter<'a> {
 
 impl<'a> IterItem<'a> {
     /// Get a shared reference to the entire [`Chunk`].
-    pub fn chunk(&self) -> &'a Chunk {
+    pub const fn chunk(&self) -> &'a Chunk {
         self.chunk
     }
 
@@ -131,7 +131,7 @@ impl<'a> IterItem<'a> {
     }
 
     /// Get the **offset** [`Coordinate`] corresponding to the [`Chunk`] item.
-    pub fn position_offset(&self) -> Coordinate {
+    pub const fn position_offset(&self) -> Coordinate {
         self.chunk.size.index_to_offset(self.index)
     }
 

@@ -26,7 +26,7 @@ pub struct Size2D {
 }
 
 impl Size {
-    pub fn new(x: u32, y: u32, z: u32) -> Self {
+    pub const fn new(x: u32, y: u32, z: u32) -> Self {
         Self { x, y, z }
     }
 
@@ -41,7 +41,7 @@ impl Size {
     /// Convert a [`Chunk`] index to an **offset** [`Coordinate`].
     ///
     /// [`Chunk`]: crate::Chunk
-    pub(crate) fn index_to_offset(&self, index: usize) -> Coordinate {
+    pub(crate) const fn index_to_offset(&self, index: usize) -> Coordinate {
         let z = (index % self.z as usize) as i32;
         let xy = index / self.z as usize;
         let x = (xy % self.x as usize) as i32;
@@ -64,7 +64,7 @@ impl Size {
 }
 
 impl Size2D {
-    pub fn new(x: u32, z: u32) -> Self {
+    pub const fn new(x: u32, z: u32) -> Self {
         Self { x, z }
     }
 
@@ -77,7 +77,7 @@ impl Size2D {
     /// Convert a [`Heights`] index to an **offset** [`Coordinate2D`].
     ///
     /// [`Heights`]: crate::Heights
-    pub(crate) fn index_to_offset(&self, index: usize) -> Coordinate2D {
+    pub(crate) const fn index_to_offset(&self, index: usize) -> Coordinate2D {
         let z = (index % self.z as usize) as i32;
         let x = (index / self.z as usize) as i32;
         Coordinate2D { x, z }
