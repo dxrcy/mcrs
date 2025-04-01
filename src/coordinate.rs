@@ -161,6 +161,14 @@ impl From<[i32; 3]> for Coordinate {
         }
     }
 }
+impl From<[i32; 2]> for Coordinate2D {
+    fn from(value: [i32; 2]) -> Self {
+        Self {
+            x: value[0],
+            z: value[1],
+        }
+    }
+}
 impl From<(i32, i32, i32)> for Coordinate {
     fn from(value: (i32, i32, i32)) -> Self {
         Self {
@@ -170,20 +178,29 @@ impl From<(i32, i32, i32)> for Coordinate {
         }
     }
 }
-
-impl From<[i32; 2]> for Coordinate2D {
-    fn from(value: [i32; 2]) -> Self {
-        Self {
-            x: value[0],
-            z: value[1],
-        }
-    }
-}
 impl From<(i32, i32)> for Coordinate2D {
     fn from(value: (i32, i32)) -> Self {
         Self {
             x: value.0,
             z: value.1,
+        }
+    }
+}
+
+impl From<Size> for Coordinate {
+    fn from(size: Size) -> Self {
+        Self {
+            x: size.x as i32,
+            y: size.y as i32,
+            z: size.z as i32,
+        }
+    }
+}
+impl From<Size2D> for Coordinate2D {
+    fn from(size: Size2D) -> Self {
+        Self {
+            x: size.x as i32,
+            z: size.z as i32,
         }
     }
 }
