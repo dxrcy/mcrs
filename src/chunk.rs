@@ -141,7 +141,7 @@ impl<'a> IterItem<'a> {
     }
 }
 
-impl<'a> fmt::Debug for IterItem<'a> {
+impl fmt::Debug for IterItem<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,

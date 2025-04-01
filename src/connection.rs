@@ -37,7 +37,7 @@ impl Connection {
         arguments: impl AsRef<[Argument<'a>]>,
     ) -> Result<()> {
         self.stream.write_fmt(format_args!("{}(", command))?;
-        for (i, arg) in arguments.as_ref().into_iter().enumerate() {
+        for (i, arg) in arguments.as_ref().iter().enumerate() {
             if i > 0 {
                 self.stream.write_fmt(format_args!(","))?;
             }
