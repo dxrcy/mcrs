@@ -1,6 +1,5 @@
 use std::io::{BufRead as _, BufReader};
 use std::net::TcpStream;
-use std::str::Split;
 
 use crate::{Block, Coordinate, Error};
 
@@ -176,42 +175,5 @@ impl<'a> ResponseStream<'a> {
             .parse_i32()?
             .expect_terminator(Terminator::Newline)?;
         Ok(Coordinate { x, y, z })
-    }
-}
-
-#[derive(Debug)]
-pub struct Response {
-    response: String,
-}
-
-impl Response {
-    pub fn new(response: String) -> Self {
-        Self { response }
-    }
-
-    pub fn as_integer_list(&self) -> Vec<i32> {
-        IntegerList::from(&self.response).collect()
-    }
-}
-
-struct IntegerList<'a> {
-    inner: Split<'a, char>,
-}
-
-impl<'a> IntegerList<'a> {
-    pub fn from(line: &'a str) -> Self {
-        Self {
-            inner: line.split(','),
-        }
-    }
-}
-
-impl Iterator for IntegerList<'_> {
-    type Item = i32;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let item = self.inner.next()?;
-        let float: f32 = item.trim().parse().ok()?;
-        Some(float.floor() as i32)
     }
 }

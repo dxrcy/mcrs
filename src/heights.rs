@@ -12,21 +12,6 @@ pub struct Heights {
 }
 
 impl Heights {
-    // TODO: Remove
-    pub(crate) fn new(
-        a: impl Into<Coordinate2D>,
-        b: impl Into<Coordinate2D>,
-        list: Vec<i32>,
-    ) -> Self {
-        let a = a.into();
-        let b = b.into();
-        Self {
-            list,
-            origin: a.min(b),
-            size: a.size_between(b),
-        }
-    }
-
     /// Get the height value at the **offset** [`Coordinate2D`].
     pub fn get_offset(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
         let coordinate = coordinate.into();
@@ -92,6 +77,7 @@ impl<'a> HeightsStream<'a> {
     }
 
     // Cannot be an iterator, due to lifetime problems
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> Result<Option<HeightsStreamItem>, Error> {
         if self.is_at_end() {
             return Ok(None);
@@ -140,7 +126,7 @@ impl<'a> HeightsStream<'a> {
     }
 }
 
-impl<'a> HeightsStreamItem<'a> {
+impl HeightsStreamItem<'_> {
     pub fn height(&self) -> i32 {
         self.height
     }

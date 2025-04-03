@@ -1,10 +1,10 @@
-use std::io::{self, BufRead, BufReader, Write};
+use std::io::{self, Write};
 use std::net::{TcpStream, ToSocketAddrs};
 
 use crate::argument::Argument;
 use crate::chunk::ChunkStream;
 use crate::heights::HeightsStream;
-use crate::response::{self, Response, ResponseStream};
+use crate::response::{self, ResponseStream};
 use crate::{Block, Chunk, Coordinate, Coordinate2D, Error, Heights};
 
 type Result<T> = std::result::Result<T, Error>;
