@@ -94,8 +94,10 @@ impl Connection {
     /// playermodel).
     pub fn get_player_position(&mut self) -> Result<Coordinate> {
         self.send("player.getPos", [])?;
-        let response = self.recv()?;
-        let coord = response.as_coordinate().expect("malformed server response");
+        let mut response = self.recv_stream();
+        let coord = response
+            .final_coordinate()
+            .expect("malformed server response");
         Ok(coord)
     }
 
@@ -123,8 +125,8 @@ impl Connection {
             "world.getBlockWithData",
             [Argument::Coordinate(location.into())],
         )?;
-        let response = self.recv()?;
-        let block = response.as_block().expect("malformed server response");
+        let mut response = self.recv_stream();
+        let block = response.final_block().expect("malformed server response");
         Ok(block)
     }
 
@@ -153,19 +155,11 @@ impl Connection {
         corner_a: impl Into<Coordinate>,
         corner_b: impl Into<Coordinate>,
     ) -> Result<Chunk> {
-        let corner_a = corner_a.into();
-        let corner_b = corner_b.into();
-        self.send(
-            "world.getBlocksWithData",
-            [
-                Argument::Coordinate(corner_a),
-                Argument::Coordinate(corner_b),
-            ],
-        )?;
-        let response = self.recv()?;
-        let list = response.as_block_list().expect("malformed server response");
-        let chunk = Chunk::new(corner_a, corner_b, list);
-        Ok(chunk)
+        Ok(self
+            .get_blocks_stream(corner_a, corner_b)
+            .unwrap()
+            .collect()
+            .unwrap())
     }
 
     pub fn get_blocks_stream(
@@ -194,8 +188,8 @@ impl Connection {
     /// [`get_heights`]: Connection::get_heights
     pub fn get_height(&mut self, location: impl Into<Coordinate2D>) -> Result<i32> {
         self.send("world.getHeight", [Argument::Coordinate2D(location.into())])?;
-        let response = self.recv()?;
-        let height = response.as_integer().expect("malformed server response");
+        let mut response = self.recv_stream();
+        let height = response.final_i32().expect("malformed server response");
         Ok(height)
     }
 

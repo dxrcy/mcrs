@@ -1,6 +1,6 @@
 use std::error;
 use std::fmt;
-use std::io::{self, Read, Write};
+use std::io::{self, Read};
 use std::mem::MaybeUninit;
 use std::net::TcpStream;
 use std::num::ParseIntError;
@@ -124,9 +124,29 @@ impl ItemBuffer {
         unsafe { std::str::from_utf8_unchecked(self.as_slice()) }
     }
 
-    pub fn parse_u32(&self) -> Result<(u32, Terminator), Error> {
-        let value = self.as_str().parse().map_err(Error::from)?;
-        Ok((value, self.terminator))
+    pub fn parse_u32(&self) -> Result<WithTerminator<u32>, Error> {
+        let string = trim_decimals(self.as_str());
+        let value = string.parse().map_err(Error::from)?;
+        Ok(WithTerminator {
+            value,
+            terminator: self.terminator,
+        })
+    }
+
+    pub fn parse_i32(&self) -> Result<WithTerminator<i32>, Error> {
+        let string = trim_decimals(self.as_str());
+        let value = string.parse().map_err(Error::from)?;
+        Ok(WithTerminator {
+            value,
+            terminator: self.terminator,
+        })
+    }
+}
+
+fn trim_decimals(string: &str) -> &str {
+    match string.find('.') {
+        Some(index) => string.split_at(index).0,
+        None => string,
     }
 }
 
@@ -142,6 +162,19 @@ impl Terminator {
     }
 }
 
+#[derive(Debug)]
+pub struct WithTerminator<T> {
+    value: T,
+    terminator: Terminator,
+}
+
+impl<T> WithTerminator<T> {
+    pub fn expect_terminator(self, expected: Terminator) -> Result<T, Error> {
+        self.terminator.expect(expected)?;
+        Ok(self.value)
+    }
+}
+
 impl<'a> ResponseStream<'a> {
     pub fn new(stream: &'a mut TcpStream) -> Self {
         Self { stream }
@@ -151,11 +184,50 @@ impl<'a> ResponseStream<'a> {
         ItemBuffer::read_from(&mut self.stream)
     }
 
-    pub fn next_block(&mut self) -> Result<(Block, Terminator), Error> {
-        let (id, terminator) = self.next()?.parse_u32()?;
-        terminator.expect(Terminator::Comma)?;
-        let (modifier, terminator) = self.next()?.parse_u32()?;
-        Ok((Block { id, modifier }, terminator))
+    pub fn final_i32(&mut self) -> Result<i32, Error> {
+        self.next()?
+            .parse_i32()?
+            .expect_terminator(Terminator::Newline)
+    }
+
+    pub fn next_block(&mut self) -> Result<Block, Error> {
+        let id = self
+            .next()?
+            .parse_u32()?
+            .expect_terminator(Terminator::Comma)?;
+        let modifier = self
+            .next()?
+            .parse_u32()?
+            .expect_terminator(Terminator::Semicolon)?;
+        Ok(Block { id, modifier })
+    }
+
+    pub fn final_block(&mut self) -> Result<Block, Error> {
+        let id = self
+            .next()?
+            .parse_u32()?
+            .expect_terminator(Terminator::Comma)?;
+        let modifier = self
+            .next()?
+            .parse_u32()?
+            .expect_terminator(Terminator::Newline)?;
+        Ok(Block { id, modifier })
+    }
+
+    pub fn final_coordinate(&mut self) -> Result<Coordinate, Error> {
+        let x = self
+            .next()?
+            .parse_i32()?
+            .expect_terminator(Terminator::Comma)?;
+        let y = self
+            .next()?
+            .parse_i32()?
+            .expect_terminator(Terminator::Comma)?;
+        let z = self
+            .next()?
+            .parse_i32()?
+            .expect_terminator(Terminator::Newline)?;
+        Ok(Coordinate { x, y, z })
     }
 }
 
@@ -169,51 +241,9 @@ impl Response {
         Self { response }
     }
 
-    pub fn as_integer(&self) -> Option<i32> {
-        self.response.trim().parse().ok()
-    }
-
-    pub fn as_coordinate(&self) -> Option<Coordinate> {
-        parse_coord(&self.response)
-    }
-
-    pub fn as_block(&self) -> Option<Block> {
-        parse_block(&self.response)
-    }
-
     pub fn as_integer_list(&self) -> Vec<i32> {
         IntegerList::from(&self.response).collect()
     }
-
-    pub fn as_block_list(&self) -> Option<Vec<Block>> {
-        let mut list = Vec::new();
-        for item in self.response.split(';') {
-            let block = parse_block(item)?;
-            list.push(block);
-        }
-        Some(list)
-    }
-}
-
-fn parse_coord(item: &str) -> Option<Coordinate> {
-    let mut iter = IntegerList::from(item);
-    let x = iter.next()?;
-    let y = iter.next()?;
-    let z = iter.next()?;
-    if iter.next().is_some() {
-        return None;
-    }
-    Some(Coordinate { x, y, z })
-}
-
-fn parse_block(item: &str) -> Option<Block> {
-    let mut iter = IntegerList::from(item);
-    let id = iter.next()? as u32;
-    let modifier = iter.next()? as u32;
-    if iter.next().is_some() {
-        return None;
-    }
-    Some(Block { id, modifier })
 }
 
 struct IntegerList<'a> {

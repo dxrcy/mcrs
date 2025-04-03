@@ -2,6 +2,7 @@ use mcrs::{Block, Connection, Coordinate};
 
 fn main() {
     let mut mc = Connection::new().expect("Failed to connect");
+    println!("{:?}", mc);
 
     let location_a = Coordinate::new(600, 100, 400);
     let location_b = Coordinate::new(601, 101, 401);
@@ -48,12 +49,8 @@ fn main() {
     }
     println!("{:?}", chunk);
 
-    return;
-
     println!("{}", Block::new(1, 8));
     println!("{}", Block::new(36, 0));
-
-    println!("{:?}", mc);
 
     mc.do_command("help\n").expect("Failed to send command");
 

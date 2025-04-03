@@ -42,14 +42,12 @@ impl<'a> ChunkStream<'a> {
             return Ok(None);
         }
 
-        let (block, terminator) = self.response.next_block()?;
         self.index += 1;
-
-        terminator.expect(if self.is_at_end() {
-            Terminator::Newline
+        let block = if self.is_at_end() {
+            self.response.final_block()?
         } else {
-            Terminator::Semicolon
-        })?;
+            self.response.next_block()?
+        };
 
         Ok(Some(StreamItem {
             chunk: self,
