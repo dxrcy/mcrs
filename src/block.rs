@@ -51,12 +51,12 @@ macro_rules! blocks {
 
             /// Gets the non-standard display name for the block.
             ///
-            /// If identifier matches but no modifier does, prints name of `id:0` followed by `?`.
+            /// If identifier matches but no modifier does, prints name of `id:0` followed by `*`.
             /// If identifier and modifier does not match, prints `UNKNOWN`.
             const fn get_display_name(&self) -> &'static str {
                 match (self.id, self.modifier) {
                     $( ($id, $modifier) => stringify!($name), )*
-                    $( ($id, _) if $modifier == 0 => concat!(stringify!($name), "?"), )*
+                    $( ($id, _) if $modifier == 0 => concat!(stringify!($name), "*"), )*
                     _ => "UNKNOWN",
                 }
             }
