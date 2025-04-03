@@ -6,3 +6,5 @@ refactor: overhaul response reading, avoid allocation
 
 feat: add mutable iterator for `Chunk` and `Heights`
 
+chore: update readme
+
