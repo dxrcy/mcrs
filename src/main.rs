@@ -1,10 +1,57 @@
 use mcrs::{Block, Connection, Coordinate};
 
 fn main() {
+    let mut mc = Connection::new().expect("Failed to connect");
+
+    let location_a = Coordinate::new(600, 100, 400);
+    let location_b = Coordinate::new(601, 101, 401);
+
+    let chunk = mc
+        .get_blocks(location_a, location_b)
+        .expect("Failed to get blocks");
+    println!("Chunk:");
+    for item in chunk.iter() {
+        println!(
+            "{} {} {}",
+            item.position_offset(),
+            item.position_worldspace(),
+            item.block(),
+        );
+    }
+    println!("{:?}", chunk);
+
+    let mut chunk = mc
+        .get_blocks_stream(location_a, location_b)
+        .expect("Failed to get blocks");
+    println!("Chunk:");
+    while let Some(item) = chunk.next().expect("Failed to read chunk") {
+        println!(
+            "{} {} {}",
+            item.position_offset(),
+            item.position_worldspace(),
+            item.block(),
+        );
+    }
+
+    let chunk = mc
+        .get_blocks_stream(location_a, location_b)
+        .expect("Failed to get blocks");
+    println!("Chunk:");
+    let chunk = chunk.collect().expect("Failed to read chunk");
+    for item in chunk.iter() {
+        println!(
+            "{} {} {}",
+            item.position_offset(),
+            item.position_worldspace(),
+            item.block(),
+        );
+    }
+    println!("{:?}", chunk);
+
+    return;
+
     println!("{}", Block::new(1, 8));
     println!("{}", Block::new(36, 0));
-
-    let mut mc = Connection::new().expect("Failed to connect");
 
     println!("{:?}", mc);
 

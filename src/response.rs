@@ -1,6 +1,45 @@
+use std::io::{self, BufRead as _, BufReader, Read as _};
+use std::net::TcpStream;
 use std::str::Split;
 
 use crate::{Block, Coordinate};
+
+#[derive(Debug)]
+pub(crate) struct ResponseStream<'a> {
+    stream: &'a mut TcpStream,
+}
+
+impl<'a> ResponseStream<'a> {
+    pub fn new(stream: &'a mut TcpStream) -> Self {
+        Self { stream }
+    }
+
+    // TODO(feat): Use custom error type
+    // TODO(feat): Handle `,` vs `;` vs '\n' separators (currently treating the same)
+    pub fn next_u32(&mut self) -> io::Result<Option<u32>> {
+        let mut item = String::new();
+        loop {
+            let mut buf = [0u8; 1];
+            let bytes_read = self.stream.read(&mut buf).unwrap();
+            if bytes_read == 0 {
+                break;
+            }
+            let ch = buf[0] as char;
+            if matches!(ch, ',' | ';' | '\n') {
+                break;
+            }
+            item.push(ch);
+        }
+        Ok(Some(item.parse().unwrap()))
+    }
+
+    pub fn next_block(&mut self) -> io::Result<Option<Block>> {
+        // TODO: Handle unexpected EOF
+        let id = self.next_u32().unwrap().expect("unexpected eof");
+        let modifier = self.next_u32().unwrap().expect("unexpected eof");
+        Ok(Some(Block { id, modifier }))
+    }
+}
 
 #[derive(Debug)]
 pub struct Response {

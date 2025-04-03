@@ -2,7 +2,8 @@ use std::io::{self, BufRead, BufReader, Write};
 use std::net::{TcpStream, ToSocketAddrs};
 
 use crate::argument::Argument;
-use crate::response::Response;
+use crate::chunk::ChunkStream;
+use crate::response::{Response, ResponseStream};
 use crate::{Block, Chunk, Coordinate, Coordinate2D, Heights};
 
 type Result<T> = io::Result<T>;
@@ -53,6 +54,10 @@ impl Connection {
         let mut buffer = String::new();
         reader.read_line(&mut buffer)?;
         Ok(Response::new(buffer))
+    }
+
+    fn recv_stream(&mut self) -> ResponseStream {
+        ResponseStream::new(&mut self.stream)
     }
 
     /// Sends a message to the in-game chat.
@@ -160,6 +165,25 @@ impl Connection {
         let response = self.recv()?;
         let list = response.as_block_list().expect("malformed server response");
         let chunk = Chunk::new(corner_a, corner_b, list);
+        Ok(chunk)
+    }
+
+    pub fn get_blocks_stream(
+        &mut self,
+        corner_a: impl Into<Coordinate>,
+        corner_b: impl Into<Coordinate>,
+    ) -> Result<ChunkStream> {
+        let corner_a = corner_a.into();
+        let corner_b = corner_b.into();
+        self.send(
+            "world.getBlocksWithData",
+            [
+                Argument::Coordinate(corner_a),
+                Argument::Coordinate(corner_b),
+            ],
+        )?;
+        let response = self.recv_stream();
+        let chunk = ChunkStream::new(corner_a, corner_b, response);
         Ok(chunk)
     }
 

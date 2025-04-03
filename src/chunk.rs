@@ -1,6 +1,100 @@
 use std::fmt;
+use std::io;
 
+use crate::response::ResponseStream;
 use crate::{Block, Coordinate, Size};
+
+pub struct ChunkStream<'a> {
+    response: ResponseStream<'a>,
+    index: usize,
+    origin: Coordinate,
+    size: Size,
+}
+
+pub struct StreamItem<'a> {
+    chunk: &'a ChunkStream<'a>,
+    index: usize,
+    block: Block,
+}
+
+impl<'a> ChunkStream<'a> {
+    pub(crate) fn new(
+        a: impl Into<Coordinate>,
+        b: impl Into<Coordinate>,
+        response: ResponseStream<'a>,
+    ) -> Self {
+        let a = a.into();
+        let b = b.into();
+        Self {
+            response,
+            index: 0,
+            origin: a.min(b),
+            size: a.size_between(b),
+        }
+    }
+
+    // TODO(feat): Convert to iterator
+    pub fn next(&mut self) -> io::Result<Option<StreamItem>> {
+        if self.index >= (self.size.x * self.size.y * self.size.z) as usize {
+            return Ok(None);
+        }
+        let block = self
+            .response
+            .next_block()?
+            .expect("unexpected eof, expected block");
+        self.index += 1;
+        Ok(Some(StreamItem {
+            chunk: self,
+            block,
+            index: self.index,
+        }))
+    }
+
+    pub fn collect(mut self) -> io::Result<Chunk> {
+        assert!(self.index == 0, "cannot collect partially-consumed stream");
+        // TODO(opt): with_capacity
+        let mut list = Vec::new();
+        while let Some(item) = self.next()? {
+            list.push(item.block);
+        }
+        Ok(Chunk {
+            list,
+            origin: self.origin,
+            size: self.size,
+        })
+    }
+}
+
+impl fmt::Debug for ChunkStream<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<Chunk stream {:?}>", self.size)
+    }
+}
+
+impl<'a> StreamItem<'a> {
+    pub fn block(&self) -> Block {
+        self.block
+    }
+
+    pub const fn position_offset(&self) -> Coordinate {
+        self.chunk.size.index_to_offset(self.index)
+    }
+
+    pub fn position_worldspace(&self) -> Coordinate {
+        self.position_offset() + self.chunk.origin
+    }
+}
+
+impl fmt::Debug for StreamItem<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "<Chunk stream item {:?} {:?}>",
+            self.position_offset(),
+            self.block(),
+        )
+    }
+}
 
 /// Stores a 3D cuboid of [`Block`]s while preserving their location relative to
 /// the base point they were gathered.
