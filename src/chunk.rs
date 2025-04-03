@@ -1,7 +1,7 @@
 use std::fmt;
 
-use crate::response::{self, ResponseStream, Terminator};
-use crate::{Block, Coordinate, Size};
+use crate::response::ResponseStream;
+use crate::{Block, Coordinate, Error, Size};
 
 pub struct ChunkStream<'a> {
     response: ResponseStream<'a>,
@@ -36,8 +36,8 @@ impl<'a> ChunkStream<'a> {
         self.index >= (self.size.x * self.size.y * self.size.z) as usize
     }
 
-    // TODO(feat): Convert to iterator?
-    pub fn next(&mut self) -> Result<Option<StreamItem>, response::Error> {
+    // Cannot be an iterator, due to lifetime problems
+    pub fn next(&mut self) -> Result<Option<StreamItem>, Error> {
         if self.is_at_end() {
             return Ok(None);
         }
@@ -56,7 +56,7 @@ impl<'a> ChunkStream<'a> {
         }))
     }
 
-    pub fn collect(mut self) -> Result<Chunk, response::Error> {
+    pub fn collect(mut self) -> Result<Chunk, Error> {
         assert!(self.index == 0, "cannot collect partially-consumed stream");
         // TODO(opt): with_capacity
         let mut list = Vec::new();
@@ -112,20 +112,6 @@ pub struct Chunk {
 }
 
 impl Chunk {
-    pub(crate) fn new(
-        a: impl Into<Coordinate>,
-        b: impl Into<Coordinate>,
-        list: Vec<Block>,
-    ) -> Self {
-        let a = a.into();
-        let b = b.into();
-        Self {
-            list,
-            origin: a.min(b),
-            size: a.size_between(b),
-        }
-    }
-
     /// Get the [`Block`] at the **offset** [`Coordinate`].
     pub fn get_offset(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
         let coordinate = coordinate.into();

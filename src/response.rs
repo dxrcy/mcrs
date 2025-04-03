@@ -1,49 +1,9 @@
-use std::error;
-use std::fmt;
-use std::io::{self, Read};
+use std::io::Read;
 use std::mem::MaybeUninit;
 use std::net::TcpStream;
-use std::num::ParseIntError;
 use std::str::Split;
 
-use crate::{Block, Coordinate};
-
-#[derive(Debug)]
-pub enum Error {
-    IORead(io::Error),
-    UnexpectedEOF,
-    ParseInt(ParseIntError),
-    ItemTooLarge {
-        max_length: usize,
-    },
-    NonAscii {
-        byte: u8,
-    },
-    UnexpectedTerminator {
-        expected: Terminator,
-        actual: Terminator,
-    },
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO(feat): Implement proper error message
-        write!(f, "{:?}", self)
-    }
-}
-
-impl error::Error for Error {}
-
-impl From<io::Error> for Error {
-    fn from(error: io::Error) -> Self {
-        Self::IORead(error)
-    }
-}
-impl From<ParseIntError> for Error {
-    fn from(error: ParseIntError) -> Self {
-        Self::ParseInt(error)
-    }
-}
+use crate::{Block, Coordinate, Error};
 
 // TODO(opt): Use custom buffered reader wrapper
 #[derive(Debug)]
@@ -150,27 +110,20 @@ fn trim_decimals(string: &str) -> &str {
     }
 }
 
-impl Terminator {
-    pub fn expect(self, expected: Terminator) -> Result<(), Error> {
-        if self != expected {
-            return Err(Error::UnexpectedTerminator {
-                expected,
-                actual: self,
-            });
-        }
-        Ok(())
-    }
-}
-
 #[derive(Debug)]
-pub struct WithTerminator<T> {
+struct WithTerminator<T> {
     value: T,
     terminator: Terminator,
 }
 
 impl<T> WithTerminator<T> {
     pub fn expect_terminator(self, expected: Terminator) -> Result<T, Error> {
-        self.terminator.expect(expected)?;
+        if self.terminator != expected {
+            return Err(Error::UnexpectedTerminator {
+                expected,
+                actual: self.terminator,
+            });
+        }
         Ok(self.value)
     }
 }

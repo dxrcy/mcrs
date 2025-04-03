@@ -4,9 +4,9 @@ use std::net::{TcpStream, ToSocketAddrs};
 use crate::argument::Argument;
 use crate::chunk::ChunkStream;
 use crate::response::{Response, ResponseStream};
-use crate::{Block, Chunk, Coordinate, Coordinate2D, Heights};
+use crate::{Block, Chunk, Coordinate, Coordinate2D, Error, Heights};
 
-type Result<T> = io::Result<T>;
+type Result<T> = std::result::Result<T, Error>;
 
 /// Connection for Minecraft server.
 #[derive(Debug)]
@@ -21,12 +21,12 @@ impl Connection {
     pub const DEFAULT_ADDRESS: &'static str = "127.0.0.1:4711";
 
     /// Create a new connection with the default server address.
-    pub fn new() -> Result<Self> {
+    pub fn new() -> io::Result<Self> {
         Self::with_address::<&str>(Self::DEFAULT_ADDRESS)
     }
 
     /// Create a new connection with a specified server address.
-    pub fn with_address<A>(addr: impl ToSocketAddrs) -> Result<Self> {
+    pub fn with_address<A>(addr: impl ToSocketAddrs) -> io::Result<Self> {
         let stream = TcpStream::connect(addr)?;
         Ok(Self { stream })
     }
@@ -48,16 +48,30 @@ impl Connection {
         Ok(())
     }
 
-    /// Receive and deserialize the next response from the server.
-    fn recv(&mut self) -> Result<Response> {
+    // TODO: Remove
+    fn send_old<'a>(
+        &mut self,
+        command: &'static str,
+        arguments: impl AsRef<[Argument<'a>]>,
+    ) -> io::Result<()> {
+        match self.send(command, arguments) {
+            Ok(response) => Ok(response),
+            Err(Error::IO(error)) => Err(error),
+            Err(_) => unreachable!(),
+        }
+    }
+
+    /// Creates a [`ResponseStream`] to read from the server.
+    fn recv(&mut self) -> ResponseStream {
+        ResponseStream::new(&mut self.stream)
+    }
+
+    // TODO: Remove
+    fn recv_old(&mut self) -> io::Result<Response> {
         let mut reader = BufReader::new(&self.stream);
         let mut buffer = String::new();
         reader.read_line(&mut buffer)?;
         Ok(Response::new(buffer))
-    }
-
-    fn recv_stream(&mut self) -> ResponseStream {
-        ResponseStream::new(&mut self.stream)
     }
 
     /// Sends a message to the in-game chat.
@@ -94,10 +108,8 @@ impl Connection {
     /// playermodel).
     pub fn get_player_position(&mut self) -> Result<Coordinate> {
         self.send("player.getPos", [])?;
-        let mut response = self.recv_stream();
-        let coord = response
-            .final_coordinate()
-            .expect("malformed server response");
+        let mut response = self.recv();
+        let coord = response.final_coordinate()?;
         Ok(coord)
     }
 
@@ -125,8 +137,8 @@ impl Connection {
             "world.getBlockWithData",
             [Argument::Coordinate(location.into())],
         )?;
-        let mut response = self.recv_stream();
-        let block = response.final_block().expect("malformed server response");
+        let mut response = self.recv();
+        let block = response.final_block()?;
         Ok(block)
     }
 
@@ -148,20 +160,21 @@ impl Connection {
         )
     }
 
-    /// Returns a [`Chunk`] of the [`Block`]s of cuboid specified by [`Coordinate`]s `corner_a` and
-    /// `corner_b` (in any order)
+    // Returns a [`Chunk`] of the [`Block`]s of cuboid specified by [`Coordinate`]s `corner_a` and
+    // `corner_b` (in any order)
+
+    // TODO(doc)
+    // TODO(rename): get_chunk
     pub fn get_blocks(
         &mut self,
         corner_a: impl Into<Coordinate>,
         corner_b: impl Into<Coordinate>,
     ) -> Result<Chunk> {
-        Ok(self
-            .get_blocks_stream(corner_a, corner_b)
-            .unwrap()
-            .collect()
-            .unwrap())
+        Ok(self.get_blocks_stream(corner_a, corner_b)?.collect()?)
     }
 
+    // TODO(doc)
+    // TODO(rename): get_chunk_stream
     pub fn get_blocks_stream(
         &mut self,
         corner_a: impl Into<Coordinate>,
@@ -176,7 +189,7 @@ impl Connection {
                 Argument::Coordinate(corner_b),
             ],
         )?;
-        let response = self.recv_stream();
+        let response = self.recv();
         let chunk = ChunkStream::new(corner_a, corner_b, response);
         Ok(chunk)
     }
@@ -188,32 +201,36 @@ impl Connection {
     /// [`get_heights`]: Connection::get_heights
     pub fn get_height(&mut self, location: impl Into<Coordinate2D>) -> Result<i32> {
         self.send("world.getHeight", [Argument::Coordinate2D(location.into())])?;
-        let mut response = self.recv_stream();
-        let height = response.final_i32().expect("malformed server response");
+        let mut response = self.recv();
+        let height = response.final_i32()?;
         Ok(height)
     }
 
-    /// Provides a scaled option of the [`get_height`] call to allow for considerable performance
-    /// gains.
-    ///
-    /// [`get_height`]: Connection::get_height
+    // Provides a scaled option of the [`get_height`] call to allow for considerable performance
+    // gains.
+    //
+    // [`get_height`]: Connection::get_height
+
+    // TODO(doc)
     pub fn get_heights(
         &mut self,
         corner_a: impl Into<Coordinate2D>,
         corner_b: impl Into<Coordinate2D>,
-    ) -> Result<Heights> {
+    ) -> io::Result<Heights> {
         let corner_a = corner_a.into();
         let corner_b = corner_b.into();
-        self.send(
+        self.send_old(
             "world.getHeights",
             [
                 Argument::Coordinate2D(corner_a),
                 Argument::Coordinate2D(corner_b),
             ],
         )?;
-        let response = self.recv()?;
+        let response = self.recv_old()?;
         let list = response.as_integer_list();
         let height_map = Heights::new(corner_a, corner_b, list);
         Ok(height_map)
     }
+
+    // TODO(feat): get_heights_stream
 }
