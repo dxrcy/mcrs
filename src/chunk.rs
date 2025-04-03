@@ -3,105 +3,6 @@ use std::fmt;
 use crate::response::ResponseStream;
 use crate::{Block, Coordinate, Error, Size};
 
-pub struct ChunkStream<'a> {
-    response: ResponseStream<'a>,
-    index: usize,
-    origin: Coordinate,
-    size: Size,
-}
-
-pub struct StreamItem<'a> {
-    chunk: &'a ChunkStream<'a>,
-    index: usize,
-    block: Block,
-}
-
-impl<'a> ChunkStream<'a> {
-    pub(crate) fn new(
-        a: impl Into<Coordinate>,
-        b: impl Into<Coordinate>,
-        response: ResponseStream<'a>,
-    ) -> Self {
-        let a = a.into();
-        let b = b.into();
-        Self {
-            response,
-            index: 0,
-            origin: a.min(b),
-            size: a.size_between(b),
-        }
-    }
-
-    fn is_at_end(&self) -> bool {
-        self.index >= (self.size.x * self.size.y * self.size.z) as usize
-    }
-
-    // Cannot be an iterator, due to lifetime problems
-    pub fn next(&mut self) -> Result<Option<StreamItem>, Error> {
-        if self.is_at_end() {
-            return Ok(None);
-        }
-
-        self.index += 1;
-        let block = if self.is_at_end() {
-            self.response.final_block()?
-        } else {
-            self.response.next_block()?
-        };
-
-        Ok(Some(StreamItem {
-            chunk: self,
-            block,
-            index: self.index,
-        }))
-    }
-
-    pub fn collect(mut self) -> Result<Chunk, Error> {
-        assert!(self.index == 0, "cannot collect partially-consumed stream");
-        // TODO(opt): with_capacity
-        let mut list = Vec::new();
-        while let Some(item) = self.next()? {
-            list.push(item.block);
-        }
-        Ok(Chunk {
-            list,
-            origin: self.origin,
-            size: self.size,
-        })
-    }
-}
-
-impl fmt::Debug for ChunkStream<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<Chunk stream {:?}>", self.size)
-    }
-}
-
-impl<'a> StreamItem<'a> {
-    pub fn block(&self) -> Block {
-        self.block
-    }
-
-    pub const fn position_offset(&self) -> Coordinate {
-        self.chunk.size.index_to_offset(self.index)
-    }
-
-    pub fn position_worldspace(&self) -> Coordinate {
-        self.position_offset() + self.chunk.origin
-    }
-}
-
-impl fmt::Debug for StreamItem<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "<Chunk stream item {:?} {:?}>",
-            self.position_offset(),
-            self.block(),
-        )
-    }
-}
-
 /// Stores a 3D cuboid of [`Block`]s while preserving their location relative to
 /// the base point they were gathered.
 #[derive(Clone)]
@@ -147,17 +48,103 @@ impl Chunk {
     }
 }
 
-impl fmt::Debug for Chunk {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<Chunk {:?}>", self.size)
-    }
-}
-
 impl<'a> IntoIterator for &'a Chunk {
     type Item = IterItem<'a>;
     type IntoIter = Iter<'a>;
     fn into_iter(self) -> Self::IntoIter {
         Iter::from(self)
+    }
+}
+
+pub struct ChunkStream<'a> {
+    response: ResponseStream<'a>,
+    index: usize,
+    origin: Coordinate,
+    size: Size,
+}
+
+pub struct ChunkStreamItem<'a> {
+    chunk: &'a ChunkStream<'a>,
+    index: usize,
+    block: Block,
+}
+
+impl<'a> ChunkStream<'a> {
+    pub(crate) fn new(
+        a: impl Into<Coordinate>,
+        b: impl Into<Coordinate>,
+        response: ResponseStream<'a>,
+    ) -> Self {
+        let a = a.into();
+        let b = b.into();
+        Self {
+            response,
+            index: 0,
+            origin: a.min(b),
+            size: a.size_between(b),
+        }
+    }
+
+    // Cannot be an iterator, due to lifetime problems
+    pub fn next(&mut self) -> Result<Option<ChunkStreamItem>, Error> {
+        if self.is_at_end() {
+            return Ok(None);
+        }
+
+        self.index += 1;
+        let block = if self.is_at_end() {
+            self.response.final_block()?
+        } else {
+            self.response.next_block()?
+        };
+
+        Ok(Some(ChunkStreamItem {
+            chunk: self,
+            block,
+            index: self.index,
+        }))
+    }
+
+    pub fn collect(mut self) -> Result<Chunk, Error> {
+        assert!(self.index == 0, "cannot collect partially-consumed stream");
+        // TODO(opt): with_capacity
+        let mut list = Vec::new();
+        while let Some(item) = self.next()? {
+            list.push(item.block);
+        }
+        Ok(Chunk {
+            list,
+            origin: self.origin,
+            size: self.size,
+        })
+    }
+
+    /// Get the origin [`Coordinate`].
+    pub const fn origin(&self) -> Coordinate {
+        self.origin
+    }
+
+    /// Get the 3D size of the chunk.
+    pub const fn size(&self) -> Size {
+        self.size
+    }
+
+    fn is_at_end(&self) -> bool {
+        self.index >= self.size.volume()
+    }
+}
+
+impl<'a> ChunkStreamItem<'a> {
+    pub fn block(&self) -> Block {
+        self.block
+    }
+
+    pub const fn position_offset(&self) -> Coordinate {
+        self.chunk.size.index_to_offset(self.index)
+    }
+
+    pub fn position_worldspace(&self) -> Coordinate {
+        self.position_offset() + self.chunk.origin
     }
 }
 
@@ -227,6 +214,26 @@ impl<'a> IterItem<'a> {
     }
 }
 
+impl fmt::Debug for ChunkStreamItem<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "<Chunk stream item {:?} {:?}>",
+            self.position_offset(),
+            self.block(),
+        )
+    }
+}
+impl fmt::Debug for Chunk {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<Chunk {:?}>", self.size)
+    }
+}
+impl fmt::Debug for ChunkStream<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<Chunk stream {:?}>", self.size)
+    }
+}
 impl fmt::Debug for IterItem<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(

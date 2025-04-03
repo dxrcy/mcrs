@@ -1,22 +1,23 @@
-use std::io::Read;
-use std::mem::MaybeUninit;
+use std::io::{BufRead as _, BufReader};
 use std::net::TcpStream;
 use std::str::Split;
 
 use crate::{Block, Coordinate, Error};
 
-// TODO(opt): Use custom buffered reader wrapper
+// TODO(doc)
+pub const MAX_ITEM_LENGTH: usize = "12345.123456890,".len();
+// TODO(doc)
+pub const MAX_SCALAR_LENGTH: usize = MAX_ITEM_LENGTH * 3;
+
 #[derive(Debug)]
 pub(crate) struct ResponseStream<'a> {
-    stream: &'a mut TcpStream,
+    buffer: &'a str,
+    index: usize,
 }
 
-const ITEM_BUFFER_SIZE: usize = 48;
-
 #[derive(Debug)]
-struct ItemBuffer {
-    bytes: MaybeUninit<[u8; ITEM_BUFFER_SIZE]>,
-    length: usize,
+struct ItemBuffer<'a> {
+    string: &'a str,
     terminator: Terminator,
 }
 
@@ -27,24 +28,17 @@ pub enum Terminator {
     Newline,
 }
 
-impl ItemBuffer {
-    pub fn read_from<R>(reader: &mut R) -> Result<Self, Error>
-    where
-        R: Read,
-    {
-        let mut bytes = MaybeUninit::<[u8; ITEM_BUFFER_SIZE]>::uninit();
-        let mut length = 0;
+impl<'a> ItemBuffer<'a> {
+    pub fn read_from(reader: &mut ResponseStream<'a>) -> Result<Self, Error> {
+        let index = reader.index;
 
         let terminator = loop {
-            let mut buf = [0u8; 1];
-            let bytes_read = reader.read(&mut buf).map_err(Error::from)?;
             // All responses must end with '\n', therefore all response ITEMS must end in *some*
             // terminator.
-            if bytes_read == 0 {
+            let Some(byte) = reader.read_byte() else {
                 return Err(Error::UnexpectedEOF);
-            }
+            };
 
-            let byte = buf[0];
             match byte {
                 b',' => break Terminator::Comma,
                 b';' => break Terminator::Semicolon,
@@ -52,36 +46,14 @@ impl ItemBuffer {
                 0x80.. => return Err(Error::NonAscii { byte }),
                 _ => (),
             }
-
-            if length >= ITEM_BUFFER_SIZE {
-                return Err(Error::ItemTooLarge {
-                    max_length: ITEM_BUFFER_SIZE,
-                });
-            }
-
-            // SAFETY: We are not reading from this reference, so it is fine to access
-            // uninitialized.
-            let bytes = unsafe { bytes.assume_init_mut() };
-            bytes[length] = byte;
-            length += 1;
         };
 
-        Ok(ItemBuffer {
-            bytes,
-            length,
-            terminator,
-        })
-    }
-
-    fn as_slice(&self) -> &[u8] {
-        // SAFETY: When the buffer was constructed, all bytes in `0..self.length` were initialized.
-        unsafe { &self.bytes.assume_init_ref()[0..self.length] }
+        let string = &reader.buffer[index..reader.index - 1];
+        Ok(ItemBuffer { string, terminator })
     }
 
     fn as_str(&self) -> &str {
-        // SAFETY: The buffer was only constructed from ASCII bytes, and could not not have been
-        // mutated after construction.
-        unsafe { std::str::from_utf8_unchecked(self.as_slice()) }
+        self.string
     }
 
     pub fn parse_u32(&self) -> Result<WithTerminator<u32>, Error> {
@@ -129,12 +101,29 @@ impl<T> WithTerminator<T> {
 }
 
 impl<'a> ResponseStream<'a> {
-    pub fn new(stream: &'a mut TcpStream) -> Self {
-        Self { stream }
+    pub fn new(
+        stream: &mut TcpStream,
+        capacity: usize,
+        buffer: &'a mut String,
+    ) -> Result<Self, Error> {
+        buffer.clear();
+        BufReader::with_capacity(capacity, stream).read_line(buffer)?;
+        Ok(Self { buffer, index: 0 })
+    }
+
+    /// This method could easily be changed to instead read by *character*, however there is
+    /// currently no need.
+    pub fn read_byte(&mut self) -> Option<u8> {
+        if self.index >= self.buffer.len() {
+            return None;
+        }
+        let byte = self.buffer.as_bytes()[self.index];
+        self.index += 1;
+        Some(byte)
     }
 
     fn next(&mut self) -> Result<ItemBuffer, Error> {
-        ItemBuffer::read_from(&mut self.stream)
+        ItemBuffer::read_from(self)
     }
 
     pub fn final_i32(&mut self) -> Result<i32, Error> {

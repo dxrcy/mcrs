@@ -3,7 +3,7 @@ use std::net::{TcpStream, ToSocketAddrs};
 
 use crate::argument::Argument;
 use crate::chunk::ChunkStream;
-use crate::response::{Response, ResponseStream};
+use crate::response::{self, Response, ResponseStream};
 use crate::{Block, Chunk, Coordinate, Coordinate2D, Error, Heights};
 
 type Result<T> = std::result::Result<T, Error>;
@@ -12,6 +12,7 @@ type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug)]
 pub struct Connection {
     stream: TcpStream,
+    response_buffer: String,
 }
 
 impl Connection {
@@ -28,7 +29,10 @@ impl Connection {
     /// Create a new connection with a specified server address.
     pub fn with_address<A>(addr: impl ToSocketAddrs) -> io::Result<Self> {
         let stream = TcpStream::connect(addr)?;
-        Ok(Self { stream })
+        Ok(Self {
+            stream,
+            response_buffer: String::new(),
+        })
     }
 
     /// Serialize and send a command to the server.
@@ -61,9 +65,18 @@ impl Connection {
         }
     }
 
+    // TODO(doc)
+    const DEFAULT_RECIEVE_CAPACITY: usize = 2 * response::MAX_SCALAR_LENGTH;
+
+    // TODO(doc)
     /// Creates a [`ResponseStream`] to read from the server.
-    fn recv(&mut self) -> ResponseStream {
-        ResponseStream::new(&mut self.stream)
+    fn recv(&mut self) -> Result<ResponseStream> {
+        self.recv_with_capacity(Self::DEFAULT_RECIEVE_CAPACITY)
+    }
+
+    // TODO(doc)
+    fn recv_with_capacity(&mut self, capacity: usize) -> Result<ResponseStream> {
+        ResponseStream::new(&mut self.stream, capacity, &mut self.response_buffer)
     }
 
     // TODO: Remove
@@ -108,7 +121,7 @@ impl Connection {
     /// playermodel).
     pub fn get_player_position(&mut self) -> Result<Coordinate> {
         self.send("player.getPos", [])?;
-        let mut response = self.recv();
+        let mut response = self.recv()?;
         let coord = response.final_coordinate()?;
         Ok(coord)
     }
@@ -137,7 +150,7 @@ impl Connection {
             "world.getBlockWithData",
             [Argument::Coordinate(location.into())],
         )?;
-        let mut response = self.recv();
+        let mut response = self.recv()?;
         let block = response.final_block()?;
         Ok(block)
     }
@@ -189,7 +202,11 @@ impl Connection {
                 Argument::Coordinate(corner_b),
             ],
         )?;
-        let response = self.recv();
+
+        let volume = corner_a.size_between(corner_b).volume();
+        let capacity = volume * response::MAX_ITEM_LENGTH;
+
+        let response = self.recv_with_capacity(capacity)?;
         let chunk = ChunkStream::new(corner_a, corner_b, response);
         Ok(chunk)
     }
@@ -201,7 +218,7 @@ impl Connection {
     /// [`get_heights`]: Connection::get_heights
     pub fn get_height(&mut self, location: impl Into<Coordinate2D>) -> Result<i32> {
         self.send("world.getHeight", [Argument::Coordinate2D(location.into())])?;
-        let mut response = self.recv();
+        let mut response = self.recv()?;
         let height = response.final_i32()?;
         Ok(height)
     }
