@@ -108,11 +108,11 @@ fn main() {
         .expect("Failed to set blocks");
     println!("Set blocks.");
 
-    let height_map = mc
+    let heights = mc
         .get_heights(location_a, location_b)
         .expect("Failed to get heights");
     println!("Heights:");
-    for item in height_map.iter() {
+    for item in heights.iter() {
         println!(
             "{} {} {}",
             item.position_offset(),
@@ -121,9 +121,22 @@ fn main() {
         );
     }
 
-    println!("{:?}", height_map);
-    println!("{}", height_map.iter().min().unwrap().height());
-    println!("{}", height_map.iter().max().unwrap().height());
+    let mut heights2 = mc
+        .get_heights_stream(location_a, location_b)
+        .expect("Failed to get heights");
+    println!("Heights:");
+    while let Some(item) = heights2.next().expect("Failed to get height") {
+        println!(
+            "{} {} {}",
+            item.position_offset(),
+            item.position_worldspace(),
+            item.height(),
+        );
+    }
+
+    println!("{:?}", heights);
+    println!("{}", heights.iter().min().unwrap().height());
+    println!("{}", heights.iter().max().unwrap().height());
 
     println!("{}", Coordinate::from([4, 5, 6]));
 

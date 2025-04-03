@@ -214,6 +214,11 @@ impl<'a> IterItem<'a> {
     }
 }
 
+impl fmt::Debug for Chunk {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<Chunk {:?}>", self.size)
+    }
+}
 impl fmt::Debug for ChunkStreamItem<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -222,16 +227,6 @@ impl fmt::Debug for ChunkStreamItem<'_> {
             self.position_offset(),
             self.block(),
         )
-    }
-}
-impl fmt::Debug for Chunk {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<Chunk {:?}>", self.size)
-    }
-}
-impl fmt::Debug for ChunkStream<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<Chunk stream {:?}>", self.size)
     }
 }
 impl fmt::Debug for IterItem<'_> {

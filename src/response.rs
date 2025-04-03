@@ -126,6 +126,12 @@ impl<'a> ResponseStream<'a> {
         ItemBuffer::read_from(self)
     }
 
+    pub fn next_i32(&mut self) -> Result<i32, Error> {
+        self.next()?
+            .parse_i32()?
+            .expect_terminator(Terminator::Comma)
+    }
+
     pub fn final_i32(&mut self) -> Result<i32, Error> {
         self.next()?
             .parse_i32()?
