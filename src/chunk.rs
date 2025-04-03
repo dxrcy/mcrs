@@ -1,7 +1,6 @@
 use std::fmt;
-use std::io;
 
-use crate::response::ResponseStream;
+use crate::response::{self, ResponseStream, Terminator};
 use crate::{Block, Coordinate, Size};
 
 pub struct ChunkStream<'a> {
@@ -33,16 +32,25 @@ impl<'a> ChunkStream<'a> {
         }
     }
 
-    // TODO(feat): Convert to iterator
-    pub fn next(&mut self) -> io::Result<Option<StreamItem>> {
-        if self.index >= (self.size.x * self.size.y * self.size.z) as usize {
+    fn is_at_end(&self) -> bool {
+        self.index >= (self.size.x * self.size.y * self.size.z) as usize
+    }
+
+    // TODO(feat): Convert to iterator?
+    pub fn next(&mut self) -> Result<Option<StreamItem>, response::Error> {
+        if self.is_at_end() {
             return Ok(None);
         }
-        let block = self
-            .response
-            .next_block()?
-            .expect("unexpected eof, expected block");
+
+        let (block, terminator) = self.response.next_block()?;
         self.index += 1;
+
+        terminator.expect(if self.is_at_end() {
+            Terminator::Newline
+        } else {
+            Terminator::Semicolon
+        })?;
+
         Ok(Some(StreamItem {
             chunk: self,
             block,
@@ -50,7 +58,7 @@ impl<'a> ChunkStream<'a> {
         }))
     }
 
-    pub fn collect(mut self) -> io::Result<Chunk> {
+    pub fn collect(mut self) -> Result<Chunk, response::Error> {
         assert!(self.index == 0, "cannot collect partially-consumed stream");
         // TODO(opt): with_capacity
         let mut list = Vec::new();
