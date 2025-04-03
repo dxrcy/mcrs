@@ -2,7 +2,7 @@ use mcrs::{Block, Connection, Coordinate};
 
 fn main() {
     let mut mc = Connection::new().expect("Failed to connect");
-    println!("{:?}", mc);
+    // println!("{:?}", mc);
 
     let location_a = Coordinate::new(600, 100, 400);
     let location_b = Coordinate::new(601, 101, 401);

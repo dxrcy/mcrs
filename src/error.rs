@@ -8,8 +8,9 @@ use crate::response::Terminator;
 #[derive(Debug)]
 pub enum Error {
     IO(io::Error),
-    UnexpectedEOF,
+    UnexpectedEof,
     ParseInt(ParseIntError),
+    ParseInt2(IntegerError),
     ItemTooLarge {
         max_length: usize,
     },
@@ -20,6 +21,13 @@ pub enum Error {
         expected: Terminator,
         actual: Terminator,
     },
+}
+
+#[derive(Debug)]
+pub enum IntegerError {
+    Empty,
+    InvalidDigit,
+    Overflow,
 }
 
 impl fmt::Display for Error {
@@ -36,8 +44,14 @@ impl From<io::Error> for Error {
         Self::IO(error)
     }
 }
+// TODO: Remove
 impl From<ParseIntError> for Error {
     fn from(error: ParseIntError) -> Self {
         Self::ParseInt(error)
+    }
+}
+impl From<IntegerError> for Error {
+    fn from(error: IntegerError) -> Self {
+        Self::ParseInt2(error)
     }
 }

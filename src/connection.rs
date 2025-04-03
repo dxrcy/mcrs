@@ -4,16 +4,14 @@ use std::net::{TcpStream, ToSocketAddrs};
 use crate::argument::Argument;
 use crate::chunk::ChunkStream;
 use crate::heights::HeightsStream;
-use crate::response::{self, ResponseStream};
-use crate::{Block, Chunk, Coordinate, Coordinate2D, Error, Heights};
-
-type Result<T> = std::result::Result<T, Error>;
+use crate::response::{BufReader, ResponseStream};
+use crate::{Block, Chunk, Coordinate, Coordinate2D, Heights, Result};
 
 /// Connection for Minecraft server.
 #[derive(Debug)]
 pub struct Connection {
     stream: TcpStream,
-    response_buffer: String,
+    reader: BufReader<TcpStream>,
 }
 
 impl Connection {
@@ -30,10 +28,8 @@ impl Connection {
     /// Create a new connection with a specified server address.
     pub fn with_address<A>(addr: impl ToSocketAddrs) -> io::Result<Self> {
         let stream = TcpStream::connect(addr)?;
-        Ok(Self {
-            stream,
-            response_buffer: String::new(),
-        })
+        let reader = BufReader::new(stream.try_clone()?);
+        Ok(Self { stream, reader })
     }
 
     /// Serialize and send a command to the server.
@@ -54,17 +50,9 @@ impl Connection {
     }
 
     // TODO(doc)
-    const DEFAULT_RECIEVE_CAPACITY: usize = 2 * response::MAX_SCALAR_LENGTH;
-
-    // TODO(doc)
     /// Creates a [`ResponseStream`] to read from the server.
     fn recv(&mut self) -> Result<ResponseStream> {
-        self.recv_with_capacity(Self::DEFAULT_RECIEVE_CAPACITY)
-    }
-
-    // TODO(doc)
-    fn recv_with_capacity(&mut self, capacity: usize) -> Result<ResponseStream> {
-        ResponseStream::new(&mut self.stream, capacity, &mut self.response_buffer)
+        ResponseStream::new(&mut self.reader)
     }
 
     /// Sends a message to the in-game chat.
@@ -194,11 +182,7 @@ impl Connection {
                 Argument::Coordinate(corner_b),
             ],
         )?;
-
-        let volume = corner_a.size_between(corner_b).volume();
-        let capacity = volume * response::MAX_ITEM_LENGTH;
-
-        let response = self.recv_with_capacity(capacity)?;
+        let response = self.recv()?;
         let chunk = ChunkStream::new(corner_a, corner_b, response);
         Ok(chunk)
     }
@@ -232,11 +216,7 @@ impl Connection {
                 Argument::Coordinate2D(corner_b),
             ],
         )?;
-
-        let volume = corner_a.size_between(corner_b).area();
-        let capacity = volume * response::MAX_ITEM_LENGTH;
-
-        let response = self.recv_with_capacity(capacity)?;
+        let response = self.recv()?;
         let heights = HeightsStream::new(corner_a, corner_b, response);
         Ok(heights)
     }

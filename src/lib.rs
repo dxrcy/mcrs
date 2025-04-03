@@ -30,3 +30,5 @@ pub use coordinate::{Coordinate, Coordinate2D};
 pub use error::Error;
 pub use heights::Heights;
 pub use size::{Size, Size2D};
+
+type Result<T> = std::result::Result<T, Error>;
