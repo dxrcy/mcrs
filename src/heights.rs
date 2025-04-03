@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, fmt};
 
-use crate::{Coordinate2D, Size2D};
+use crate::{response::ResponseStream, Coordinate2D, Error, Size2D};
 
 /// Stores a 2D area of the world with the `y`-values of the highest solid block
 /// in each column (`x`, `z` coordinate).
@@ -12,6 +12,7 @@ pub struct Heights {
 }
 
 impl Heights {
+    // TODO: Remove
     pub(crate) fn new(
         a: impl Into<Coordinate2D>,
         b: impl Into<Coordinate2D>,
@@ -61,9 +62,95 @@ impl Heights {
     }
 }
 
-impl fmt::Debug for Heights {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<HeightMap {:?}>", self.size)
+pub struct HeightsStream<'a> {
+    response: ResponseStream<'a>,
+    index: usize,
+    origin: Coordinate2D,
+    size: Size2D,
+}
+
+pub struct HeightsStreamItem<'a> {
+    chunk: &'a HeightsStream<'a>,
+    index: usize,
+    height: i32,
+}
+
+impl<'a> HeightsStream<'a> {
+    pub(crate) fn new(
+        a: impl Into<Coordinate2D>,
+        b: impl Into<Coordinate2D>,
+        response: ResponseStream<'a>,
+    ) -> Self {
+        let a = a.into();
+        let b = b.into();
+        Self {
+            response,
+            index: 0,
+            origin: a.min(b),
+            size: a.size_between(b),
+        }
+    }
+
+    // Cannot be an iterator, due to lifetime problems
+    pub fn next(&mut self) -> Result<Option<HeightsStreamItem>, Error> {
+        if self.is_at_end() {
+            return Ok(None);
+        }
+
+        self.index += 1;
+        let height = if self.is_at_end() {
+            self.response.final_i32()?
+        } else {
+            self.response.next_i32()?
+        };
+
+        Ok(Some(HeightsStreamItem {
+            chunk: self,
+            height,
+            index: self.index,
+        }))
+    }
+
+    pub fn collect(mut self) -> Result<Heights, Error> {
+        assert!(self.index == 0, "cannot collect partially-consumed stream");
+        // TODO(opt): with_capacity
+        let mut list = Vec::new();
+        while let Some(item) = self.next()? {
+            list.push(item.height);
+        }
+        Ok(Heights {
+            list,
+            origin: self.origin,
+            size: self.size,
+        })
+    }
+
+    /// Get the origin [`Coordinate`].
+    pub const fn origin(&self) -> Coordinate2D {
+        self.origin
+    }
+
+    /// Get the 3D size of the chunk.
+    pub const fn size(&self) -> Size2D {
+        self.size
+    }
+
+    fn is_at_end(&self) -> bool {
+        self.index >= self.size.area()
+    }
+}
+
+impl<'a> HeightsStreamItem<'a> {
+    pub fn height(&self) -> i32 {
+        self.height
+    }
+
+    pub const fn position_offset(&self) -> Coordinate2D {
+        self.chunk.size.index_to_offset(self.index)
+    }
+
+    pub fn position_worldspace(&self) -> Coordinate2D {
+        self.position_offset() + self.chunk.origin
     }
 }
 
@@ -144,17 +231,6 @@ impl<'a> IterItem<'a> {
     }
 }
 
-impl fmt::Debug for IterItem<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "<HeightMap item {} {}>",
-            self.position_offset(),
-            self.height(),
-        )
-    }
-}
-
 impl PartialEq for IterItem<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.height() == other.height()
@@ -178,5 +254,26 @@ impl Ord for IterItem<'_> {
             return Ordering::Greater;
         }
         Ordering::Equal
+    }
+}
+
+impl fmt::Debug for Heights {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<Heights {:?}>", self.size)
+    }
+}
+impl fmt::Debug for HeightsStream<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<Heights stream {:?}>", self.size)
+    }
+}
+impl fmt::Debug for IterItem<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "<Heights item {} {}>",
+            self.position_offset(),
+            self.height(),
+        )
     }
 }

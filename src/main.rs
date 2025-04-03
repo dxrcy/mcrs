@@ -1,12 +1,56 @@
 use mcrs::{Block, Connection, Coordinate};
 
 fn main() {
+    let mut mc = Connection::new().expect("Failed to connect");
+    println!("{:?}", mc);
+
+    let location_a = Coordinate::new(600, 100, 400);
+    let location_b = Coordinate::new(601, 101, 401);
+
+    let chunk = mc
+        .get_blocks(location_a, location_b)
+        .expect("Failed to get blocks");
+    println!("Chunk:");
+    for item in chunk.iter() {
+        println!(
+            "{} {} {}",
+            item.position_offset(),
+            item.position_worldspace(),
+            item.block(),
+        );
+    }
+    println!("{:?}", chunk);
+
+    let mut chunk = mc
+        .get_blocks_stream(location_a, location_b)
+        .expect("Failed to get blocks");
+    println!("Chunk:");
+    while let Some(item) = chunk.next().expect("Failed to read chunk") {
+        println!(
+            "{} {} {}",
+            item.position_offset(),
+            item.position_worldspace(),
+            item.block(),
+        );
+    }
+
+    let chunk = mc
+        .get_blocks_stream(location_a, location_b)
+        .expect("Failed to get blocks");
+    println!("Chunk:");
+    let chunk = chunk.collect().expect("Failed to read chunk");
+    for item in chunk.iter() {
+        println!(
+            "{} {} {}",
+            item.position_offset(),
+            item.position_worldspace(),
+            item.block(),
+        );
+    }
+    println!("{:?}", chunk);
+
     println!("{}", Block::new(1, 8));
     println!("{}", Block::new(36, 0));
-
-    let mut mc = Connection::new().expect("Failed to connect");
-
-    println!("{:?}", mc);
 
     mc.do_command("help\n").expect("Failed to send command");
 
@@ -64,11 +108,11 @@ fn main() {
         .expect("Failed to set blocks");
     println!("Set blocks.");
 
-    let height_map = mc
+    let heights = mc
         .get_heights(location_a, location_b)
         .expect("Failed to get heights");
     println!("Heights:");
-    for item in height_map.iter() {
+    for item in heights.iter() {
         println!(
             "{} {} {}",
             item.position_offset(),
@@ -77,9 +121,22 @@ fn main() {
         );
     }
 
-    println!("{:?}", height_map);
-    println!("{}", height_map.iter().min().unwrap().height());
-    println!("{}", height_map.iter().max().unwrap().height());
+    let mut heights2 = mc
+        .get_heights_stream(location_a, location_b)
+        .expect("Failed to get heights");
+    println!("Heights:");
+    while let Some(item) = heights2.next().expect("Failed to get height") {
+        println!(
+            "{} {} {}",
+            item.position_offset(),
+            item.position_worldspace(),
+            item.height(),
+        );
+    }
+
+    println!("{:?}", heights);
+    println!("{}", heights.iter().min().unwrap().height());
+    println!("{}", heights.iter().max().unwrap().height());
 
     println!("{}", Coordinate::from([4, 5, 6]));
 

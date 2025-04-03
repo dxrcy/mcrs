@@ -61,6 +61,11 @@ impl Size {
         ];
         z + (x + y * self.x as usize) * self.z as usize
     }
+
+    /// Returns the amount of blocks in the cuboid volume.
+    pub fn volume(&self) -> usize {
+        self.x as usize * self.y as usize * self.z as usize
+    }
 }
 
 impl Size2D {
@@ -89,6 +94,11 @@ impl Size2D {
     pub(crate) fn offset_to_index(&self, coordinate: impl Into<Coordinate2D>) -> usize {
         let coordinate = coordinate.into();
         coordinate.z as usize + coordinate.x as usize * self.z as usize
+    }
+
+    // Returns the amount of blocks in the flat area.
+    pub fn area(&self) -> usize {
+        self.x as usize * self.z as usize
     }
 }
 
