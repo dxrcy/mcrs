@@ -1,8 +1,8 @@
 [package]
 name = "mcrs"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
-description = "A library to interface with Minecraft"
+description = "Interface with a local Minecraft server"
 authors = ["darcy"]
 license = "GPL-3.0"
 documentation = "https://docs.rs/mcrs/latest/mcrs"
