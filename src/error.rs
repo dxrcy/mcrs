@@ -1,26 +1,19 @@
 use std::error;
 use std::fmt;
 use std::io;
-use std::num::ParseIntError;
 
 use crate::response::Terminator;
 
 #[derive(Debug)]
 pub enum Error {
+    // TODO(feat): Remove generic IO error kind
     IO(io::Error),
-    UnexpectedEof,
-    ParseInt(ParseIntError),
-    ParseInt2(IntegerError),
-    ItemTooLarge {
-        max_length: usize,
-    },
-    NonAscii {
-        byte: u8,
-    },
+    ParseInt(IntegerError),
     UnexpectedTerminator {
         expected: Terminator,
         actual: Terminator,
     },
+    UnexpectedEof,
 }
 
 #[derive(Debug)]
@@ -44,14 +37,8 @@ impl From<io::Error> for Error {
         Self::IO(error)
     }
 }
-// TODO: Remove
-impl From<ParseIntError> for Error {
-    fn from(error: ParseIntError) -> Self {
-        Self::ParseInt(error)
-    }
-}
 impl From<IntegerError> for Error {
     fn from(error: IntegerError) -> Self {
-        Self::ParseInt2(error)
+        Self::ParseInt(error)
     }
 }
