@@ -25,8 +25,28 @@ pub enum IntegerError {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO(feat): Implement proper error message
-        write!(f, "{:?}", self)
+        match self {
+            Self::IO(error) => write!(f, "Input/output error: {}", error)?,
+            Self::ParseInt(error) => write!(f, "Parsing integer: {}", error)?,
+            Self::UnexpectedTerminator { expected, actual } => write!(
+                f,
+                "Unexpected response terminator: expected {}, found {}",
+                expected, actual,
+            )?,
+            Self::UnexpectedEof => write!(f, "Unexpected end of stream")?,
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for IntegerError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Empty => write!(f, "Empty value")?,
+            Self::InvalidDigit => write!(f, "Invalid digit")?,
+            Self::Overflow => write!(f, "Value would overflow")?,
+        }
+        Ok(())
     }
 }
 

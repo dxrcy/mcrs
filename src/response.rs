@@ -1,3 +1,4 @@
+use std::fmt;
 use std::io::Read;
 use std::net::TcpStream;
 
@@ -205,6 +206,16 @@ pub enum Terminator {
     Comma,
     Semicolon,
     Newline,
+}
+
+impl fmt::Display for Terminator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Comma => write!(f, "comma (,)"),
+            Self::Semicolon => write!(f, "semicolon (;)"),
+            Self::Newline => write!(f, "newline (\\n)"),
+        }
+    }
 }
 
 impl TryFrom<u8> for Terminator {

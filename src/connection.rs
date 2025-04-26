@@ -14,6 +14,8 @@ pub struct Connection {
     reader: BufReader<TcpStream>,
 }
 
+// TODO(feat): Add context to errors?
+
 impl Connection {
     /// Default server address and port for [ELCI].
     ///
