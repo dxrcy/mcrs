@@ -8,6 +8,6 @@ license = "GPL-3.0"
 documentation = "https://docs.rs/mcrs/latest/mcrs"
 repository = "https://github.com/dxrcy/mcrs"
 keywords = ["minecraft", "api"]
-exclude = ["target"]
+exclude = ["target", "tests"]
 
 [dependencies]
