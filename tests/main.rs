@@ -1,5 +1,6 @@
 use mcrs::{Block, Connection, Coordinate};
 
+#[test]
 fn main() {
     let mut mc = Connection::new().expect("Failed to connect");
     // println!("{:?}", mc);
@@ -7,7 +8,7 @@ fn main() {
     let location_a = Coordinate::new(600, 100, 400);
     let location_b = Coordinate::new(601, 101, 401);
 
-    println!("{}", mc.get_player_position().unwrap_err());
+    // println!("{}", mc.get_player_position().unwrap_err());
 
     let chunk = mc
         .get_blocks(location_a, location_b)
