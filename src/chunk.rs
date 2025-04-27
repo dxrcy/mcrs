@@ -41,18 +41,16 @@ impl Chunk {
     pub const fn size(&self) -> Size {
         self.size
     }
-
-    /// Create an iterator over the blocks in the chunk.
-    pub const fn iter(&self) -> Iter {
-        Iter::from(self)
-    }
 }
 
 impl<'a> IntoIterator for &'a Chunk {
     type Item = IterItem<'a>;
     type IntoIter = Iter<'a>;
     fn into_iter(self) -> Self::IntoIter {
-        Iter::from(self)
+        Iter {
+            chunk: self,
+            index: 0,
+        }
     }
 }
 
@@ -162,13 +160,6 @@ pub struct Iter<'a> {
 pub struct IterItem<'a> {
     chunk: &'a Chunk,
     index: usize,
-}
-
-impl<'a> Iter<'a> {
-    // TODO(refactor): Remove and inline in `Chunk::iter`
-    pub const fn from(chunk: &'a Chunk) -> Self {
-        Self { chunk, index: 0 }
-    }
 }
 
 impl<'a> Iterator for Iter<'a> {

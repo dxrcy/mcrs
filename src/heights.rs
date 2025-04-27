@@ -40,11 +40,6 @@ impl Heights {
     pub const fn size(&self) -> Size2D {
         self.size
     }
-
-    /// Create an iterator over the height values in the area.
-    pub const fn iter(&self) -> Iter {
-        Iter::from(self)
-    }
 }
 
 pub struct HeightsStream<'a> {
@@ -143,7 +138,10 @@ impl<'a> IntoIterator for &'a Heights {
     type Item = IterItem<'a>;
     type IntoIter = Iter<'a>;
     fn into_iter(self) -> Self::IntoIter {
-        Iter::from(self)
+        Iter {
+            height_map: self,
+            index: 0,
+        }
     }
 }
 
@@ -161,16 +159,6 @@ pub struct Iter<'a> {
 pub struct IterItem<'a> {
     height_map: &'a Heights,
     index: usize,
-}
-
-impl<'a> Iter<'a> {
-    // TODO(refactor): Remove and inline in `Heights::iter`
-    pub const fn from(chunk: &'a Heights) -> Self {
-        Self {
-            height_map: chunk,
-            index: 0,
-        }
-    }
 }
 
 impl<'a> Iterator for Iter<'a> {
