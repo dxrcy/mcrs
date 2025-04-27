@@ -25,6 +25,7 @@ pub struct Connection {
 }
 
 // TODO(feat): Add context to errors?
+// TODO(doc): Rewrite documentation for functionality methods
 
 impl Connection {
     /// Default address and port for [ELCI] server.
@@ -41,7 +42,7 @@ impl Connection {
 
     /// Create a new connection with the ([default server address]).
     ///
-    /// [default server address]: `Self::DEFAULT_ADDRESS`
+    /// [default server address]: Self::DEFAULT_ADDRESS
     #[cfg(not(feature = "uds"))]
     pub fn new() -> io::Result<Self> {
         Self::from_stream(TcpStream::connect(Self::DEFAULT_ADDRESS)?)
@@ -49,7 +50,7 @@ impl Connection {
 
     /// Create a new connection with the ([default server path]).
     ///
-    /// [default server path]: `Self::DEFAULT_PATH`
+    /// [default server path]: Self::DEFAULT_PATH
     #[cfg(feature = "uds")]
     pub fn new() -> io::Result<Self> {
         Self::from_stream(UnixStream::connect(Self::DEFAULT_PATH)?)
@@ -90,7 +91,6 @@ impl Connection {
         Ok(())
     }
 
-    // TODO(doc)
     /// Creates a [`ResponseStream`] to read from the server.
     fn recv(&mut self) -> Result<ResponseStream> {
         ResponseStream::new(&mut self.reader)
@@ -194,10 +194,13 @@ impl Connection {
         )
     }
 
-    // Returns a [`Chunk`] of the [`Block`]s of cuboid specified by [`Coordinate`]s `corner_a` and
-    // `corner_b` (in any order)
-
-    // TODO(doc)
+    /// Returns a [`Chunk`] structure of the [`Block`]s in cuboid specified by [`Coordinate`]s
+    /// `corner_a` and `corner_b` (in any order).
+    ///
+    /// Reads entire response and allocates [`Chunk`] structure. To read response as a stream, use
+    /// [`get_blocks_stream`] instead.
+    ///
+    /// [`get_blocks_stream`]: Connection::get_blocks_stream
     // TODO(rename): get_chunk
     pub fn get_blocks(
         &mut self,
@@ -207,7 +210,12 @@ impl Connection {
         self.get_blocks_stream(corner_a, corner_b)?.collect()
     }
 
-    // TODO(doc)
+    /// Returns a [`Chunk`] structure of the [`Block`]s in cuboid specified by [`Coordinate`]s
+    /// `corner_a` and `corner_b` (in any order).
+    ///
+    /// Reads response as a stream to avoid unneccessary allocation. See also: [`get_blocks`].
+    ///
+    /// [`get_blocks`]: Connection::get_blocks
     // TODO(rename): get_chunk_stream
     pub fn get_blocks_stream(
         &mut self,
@@ -228,12 +236,13 @@ impl Connection {
         Ok(chunk)
     }
 
-    // Provides a scaled option of the [`get_height`] call to allow for considerable performance
-    // gains.
-    //
-    // [`get_height`]: Connection::get_height
-
-    // TODO(doc)
+    /// Returns a [`Heights`] structure of y-values in rectangle specified by [`Coordinate2D`]s
+    /// `corner_a` and `corner_b` (in any order).
+    ///
+    /// Reads entire response and allocates [`Heights`] structure. To read response as a stream, use
+    /// [`get_heights_stream`] instead.
+    ///
+    /// [`get_heights_stream`]: Connection::get_heights_stream
     pub fn get_heights(
         &mut self,
         corner_a: impl Into<Coordinate2D>,
@@ -242,7 +251,12 @@ impl Connection {
         self.get_heights_stream(corner_a, corner_b)?.collect()
     }
 
-    // TODO(doc)
+    /// Returns a [`Heights`] structure of y-values in rectangle specified by [`Coordinate2D`]s
+    /// `corner_a` and `corner_b` (in any order).
+    ///
+    /// Reads response as a stream to avoid unneccessary allocation. See also: [`get_heights`].
+    ///
+    /// [`get_heights`]: Connection::get_heights
     pub fn get_heights_stream(
         &mut self,
         corner_a: impl Into<Coordinate2D>,
