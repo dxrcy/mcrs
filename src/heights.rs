@@ -99,8 +99,7 @@ impl<'a> HeightsStream<'a> {
 
     pub fn collect(mut self) -> Result<Heights, Error> {
         assert!(self.index == 0, "cannot collect partially-consumed stream");
-        // TODO(opt): with_capacity
-        let mut list = Vec::new();
+        let mut list = Vec::with_capacity(self.size().area());
         while let Some(item) = self.next()? {
             list.push(item.height);
         }
