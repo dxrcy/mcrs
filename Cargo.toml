@@ -11,3 +11,6 @@ keywords = ["minecraft", "api"]
 exclude = ["target", "tests"]
 
 [dependencies]
+
+[features]
+uds = []

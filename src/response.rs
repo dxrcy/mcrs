@@ -1,8 +1,8 @@
 use std::fmt;
 use std::io::Read;
 
+use crate::connection::Stream;
 use crate::error::IntegerError;
-use crate::stream::Stream;
 use crate::{Block, Coordinate, Error, Result};
 
 const BUFFER_SIZE: usize = 0x2000;
