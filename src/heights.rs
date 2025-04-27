@@ -111,7 +111,7 @@ impl<'a> HeightsStream<'a> {
         })
     }
 
-    /// Get the origin [`Coordinate`].
+    /// Get the origin [`Coordinate2D`].
     pub const fn origin(&self) -> Coordinate2D {
         self.origin
     }
