@@ -22,6 +22,7 @@ mod coordinate;
 mod error;
 mod response;
 mod size;
+mod stream;
 
 pub use block::Block;
 pub use chunk::Chunk;

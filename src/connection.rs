@@ -1,38 +1,36 @@
 use std::io::{self, Write};
-use std::net::{TcpStream, ToSocketAddrs};
 
 use crate::argument::Argument;
 use crate::chunk::ChunkStream;
 use crate::heights::HeightsStream;
 use crate::response::{BufReader, ResponseStream};
+use crate::stream::Stream;
 use crate::{Block, Chunk, Coordinate, Coordinate2D, Heights, Result};
 
 /// Connection for Minecraft server.
 #[derive(Debug)]
 pub struct Connection {
-    stream: TcpStream,
-    reader: BufReader<TcpStream>,
+    stream: Stream,
+    reader: BufReader<Stream>,
 }
 
 // TODO(feat): Add context to errors?
 
 impl Connection {
-    /// Default server address and port for [ELCI].
-    ///
-    /// [ELCI]: https://github.com/rozukke/elci
-    pub const DEFAULT_ADDRESS: &'static str = "127.0.0.1:4711";
-
     /// Create a new connection with the default server address.
     pub fn new() -> io::Result<Self> {
-        Self::with_address::<&str>(Self::DEFAULT_ADDRESS)
+        let stream = Stream::new()?;
+        let reader = BufReader::new(stream.try_clone()?);
+        Ok(Self { stream, reader })
+        // Self::with_address::<&str>(Self::DEFAULT_ADDRESS)
     }
 
     /// Create a new connection with a specified server address.
-    pub fn with_address<A>(addr: impl ToSocketAddrs) -> io::Result<Self> {
-        let stream = TcpStream::connect(addr)?;
-        let reader = BufReader::new(stream.try_clone()?);
-        Ok(Self { stream, reader })
-    }
+    // pub fn with_address<A>(addr: impl ToSocketAddrs) -> io::Result<Self> {
+    //     let stream = TcpStream::connect(addr)?;
+    //     let reader = BufReader::new(stream.try_clone()?);
+    //     Ok(Self { stream, reader })
+    // }
 
     /// Serialize and send a command to the server.
     fn send<'a>(

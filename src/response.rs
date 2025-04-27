@@ -1,19 +1,19 @@
 use std::fmt;
 use std::io::Read;
-use std::net::TcpStream;
 
 use crate::error::IntegerError;
+use crate::stream::Stream;
 use crate::{Block, Coordinate, Error, Result};
 
 const BUFFER_SIZE: usize = 0x2000;
 
 #[derive(Debug)]
 pub struct ResponseStream<'a> {
-    reader: IntegerStream<'a, TcpStream>,
+    reader: IntegerStream<'a, Stream>,
 }
 
 impl<'a> ResponseStream<'a> {
-    pub fn new(reader: &'a mut BufReader<TcpStream>) -> Result<Self> {
+    pub fn new(reader: &'a mut BufReader<Stream>) -> Result<Self> {
         let reader = IntegerStream::new(reader);
         Ok(Self { reader })
     }
