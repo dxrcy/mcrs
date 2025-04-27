@@ -1,20 +1,15 @@
 use std::io;
-use std::net::TcpStream;
+use std::os::unix::net::UnixStream;
 
 #[derive(Debug)]
 pub struct Stream {
-    inner: TcpStream,
+    inner: UnixStream,
 }
 
 impl Stream {
-    /// Default server address and port for [ELCI].
-    ///
-    /// [ELCI]: https://github.com/rozukke/elci
-    pub const DEFAULT_ADDRESS: &'static str = "127.0.0.1:4711";
-
     pub fn new() -> io::Result<Self> {
         Ok(Self {
-            inner: TcpStream::connect(Self::DEFAULT_ADDRESS)?,
+            inner: UnixStream::connect("/tmp/elci-proxy")?,
         })
     }
 
