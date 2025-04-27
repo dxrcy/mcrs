@@ -139,7 +139,7 @@ impl<'a> IntoIterator for &'a Heights {
     type IntoIter = Iter<'a>;
     fn into_iter(self) -> Self::IntoIter {
         Iter {
-            height_map: self,
+            heights: self,
             index: 0,
         }
     }
@@ -149,7 +149,7 @@ impl<'a> IntoIterator for &'a Heights {
 ///
 /// Holds a shared reference to the original [`Heights`].
 pub struct Iter<'a> {
-    height_map: &'a Heights,
+    heights: &'a Heights,
     index: usize,
 }
 
@@ -157,7 +157,7 @@ pub struct Iter<'a> {
 ///
 /// Holds a shared reference to the original [`Heights`].
 pub struct IterItem<'a> {
-    height_map: &'a Heights,
+    heights: &'a Heights,
     index: usize,
 }
 
@@ -165,13 +165,13 @@ impl<'a> Iterator for Iter<'a> {
     type Item = IterItem<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.index >= self.height_map.list.len() {
+        if self.index >= self.heights.list.len() {
             return None;
         }
         let index = self.index;
         self.index += 1;
         let item = IterItem {
-            height_map: self.height_map,
+            heights: self.heights,
             index,
         };
         Some(item)
@@ -180,14 +180,14 @@ impl<'a> Iterator for Iter<'a> {
 
 impl<'a> IterItem<'a> {
     /// Get a shared reference to the entire [`Heights`].
-    pub const fn height_map(&self) -> &'a Heights {
-        self.height_map
+    pub const fn heights(&self) -> &'a Heights {
+        self.heights
     }
 
     /// Get the height value corresponding to the [`Heights`] item.
     pub fn height(&self) -> i32 {
         *self
-            .height_map
+            .heights
             .list
             .get(self.index)
             .expect("should be valid index in chunk")
@@ -195,12 +195,12 @@ impl<'a> IterItem<'a> {
 
     /// Get the **offset** [`Coordinate2D`] corresponding to the [`Heights`] item.
     pub const fn position_offset(&self) -> Coordinate2D {
-        self.height_map.size.index_to_offset(self.index)
+        self.heights.size.index_to_offset(self.index)
     }
 
     /// Get the **worldspace** [`Coordinate2D`] corresponding to the [`Heights`] item.
     pub fn position_worldspace(&self) -> Coordinate2D {
-        self.position_offset() + self.height_map.origin
+        self.position_offset() + self.heights.origin
     }
 }
 
