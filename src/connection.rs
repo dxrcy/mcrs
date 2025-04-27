@@ -1,5 +1,4 @@
 use std::io::{self, Write};
-use std::net::{TcpStream, ToSocketAddrs};
 
 use crate::argument::Argument;
 use crate::chunk::ChunkStream;
@@ -7,29 +6,69 @@ use crate::heights::HeightsStream;
 use crate::response::{BufReader, ResponseStream};
 use crate::{Block, Chunk, Coordinate, Coordinate2D, Heights, Result};
 
+#[cfg(not(feature = "uds"))]
+use std::net::TcpStream;
+#[cfg(feature = "uds")]
+use std::os::unix::net::UnixStream;
+
+// `pub(crate)` so that `ResponseStream` can use it without being generic
+#[cfg(not(feature = "uds"))]
+pub(crate) type Stream = TcpStream;
+#[cfg(feature = "uds")]
+pub(crate) type Stream = UnixStream;
+
 /// Connection for Minecraft server.
 #[derive(Debug)]
 pub struct Connection {
-    stream: TcpStream,
-    reader: BufReader<TcpStream>,
+    stream: Stream,
+    reader: BufReader<Stream>,
 }
 
 // TODO(feat): Add context to errors?
 
 impl Connection {
-    /// Default server address and port for [ELCI].
+    /// Default address and port for [ELCI] server.
     ///
     /// [ELCI]: https://github.com/rozukke/elci
-    pub const DEFAULT_ADDRESS: &'static str = "127.0.0.1:4711";
+    #[cfg(not(feature = "uds"))]
+    pub const DEFAULT_ADDRESS: &str = "127.0.0.1:4711";
 
-    /// Create a new connection with the default server address.
+    /// Default unix socket path for [ELCI] server.
+    ///
+    /// [ELCI]: https://github.com/rozukke/elci
+    #[cfg(feature = "uds")]
+    pub const DEFAULT_PATH: &str = "/tmp/elci-proxy";
+
+    /// Create a new connection with the ([default server address]).
+    ///
+    /// [default server address]: `Self::DEFAULT_ADDRESS`
+    #[cfg(not(feature = "uds"))]
     pub fn new() -> io::Result<Self> {
-        Self::with_address::<&str>(Self::DEFAULT_ADDRESS)
+        Self::from_stream(TcpStream::connect(Self::DEFAULT_ADDRESS)?)
+    }
+
+    /// Create a new connection with the ([default server path]).
+    ///
+    /// [default server path]: `Self::DEFAULT_PATH`
+    #[cfg(feature = "uds")]
+    pub fn new() -> io::Result<Self> {
+        Self::from_stream(UnixStream::connect(Self::DEFAULT_PATH)?)
     }
 
     /// Create a new connection with a specified server address.
-    pub fn with_address<A>(addr: impl ToSocketAddrs) -> io::Result<Self> {
-        let stream = TcpStream::connect(addr)?;
+    #[cfg(not(feature = "uds"))]
+    pub fn with_address(addr: impl std::net::ToSocketAddrs) -> io::Result<Self> {
+        Self::from_stream(TcpStream::connect(addr)?)
+    }
+
+    /// Create a new connection with a specified server path.
+    #[cfg(feature = "uds")]
+    pub fn with_path(path: impl AsRef<std::path::Path>) -> io::Result<Self> {
+        Self::from_stream(UnixStream::connect(path)?)
+    }
+
+    /// Create a new connection from a given [`Stream`].
+    fn from_stream(stream: Stream) -> io::Result<Self> {
         let reader = BufReader::new(stream.try_clone()?);
         Ok(Self { stream, reader })
     }
