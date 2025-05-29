@@ -14,7 +14,7 @@ fn main() {
         .get_blocks(location_a, location_b)
         .expect("Failed to get blocks");
     println!("Chunk:");
-    for item in chunk.iter() {
+    for item in chunk.into_iter() {
         println!(
             "{} {} {}",
             item.position_offset(),
@@ -42,7 +42,7 @@ fn main() {
         .expect("Failed to get blocks");
     println!("Chunk:");
     let chunk = chunk.collect().expect("Failed to read chunk");
-    for item in chunk.iter() {
+    for item in chunk.into_iter() {
         println!(
             "{} {} {}",
             item.position_offset(),
@@ -94,7 +94,7 @@ fn main() {
         .get_blocks(location_a, location_b)
         .expect("Failed to get blocks");
     println!("Chunk:");
-    for item in chunk.iter() {
+    for item in chunk.into_iter() {
         println!(
             "{} {} {}",
             item.position_offset(),
@@ -115,7 +115,7 @@ fn main() {
         .get_heights(location_a, location_b)
         .expect("Failed to get heights");
     println!("Heights:");
-    for item in heights.iter() {
+    for item in heights.into_iter() {
         println!(
             "{} {} {}",
             item.position_offset(),
@@ -138,8 +138,8 @@ fn main() {
     }
 
     println!("{:?}", heights);
-    println!("{}", heights.iter().min().unwrap().height());
-    println!("{}", heights.iter().max().unwrap().height());
+    println!("{}", heights.into_iter().min().unwrap().height());
+    println!("{}", heights.into_iter().max().unwrap().height());
 
     println!("{}", Coordinate::from([4, 5, 6]));
 
