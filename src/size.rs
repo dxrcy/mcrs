@@ -52,7 +52,7 @@ impl Size {
     /// Convert an **offset** [`Coordinate`] to a [`Chunk`] index.
     ///
     /// [`Chunk`]: crate::Chunk
-    pub(crate) fn offset_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
+    pub fn offset_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
         let coordinate = coordinate.into();
         let [x, y, z] = [
             coordinate.x as usize,
@@ -96,7 +96,7 @@ impl Size2D {
     /// Convert an **offset** [`Coordinate2D`] to a [`Heights`] index.
     ///
     /// [`Heights`]: crate::Heights
-    pub(crate) fn offset_to_index(&self, coordinate: impl Into<Coordinate2D>) -> usize {
+    pub fn offset_to_index(&self, coordinate: impl Into<Coordinate2D>) -> usize {
         let coordinate = coordinate.into();
         coordinate.z as usize + coordinate.x as usize * self.z as usize
     }
