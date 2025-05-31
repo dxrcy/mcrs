@@ -39,6 +39,11 @@ impl Coordinate {
             z: (self.z - other.z).unsigned_abs() + 1,
         }
     }
+
+    // TODO(doc)
+    pub fn flat(&self) -> Coordinate2D {
+        self.clone().into()
+    }
 }
 
 impl Coordinate2D {
