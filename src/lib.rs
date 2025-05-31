@@ -14,6 +14,8 @@
 pub mod chunk;
 /// Types related to [`Heights`].
 pub mod heights;
+/// Types related to [`Size`] and [`Size2D`].
+mod size;
 
 mod argument;
 mod block;
@@ -21,7 +23,6 @@ mod connection;
 mod coordinate;
 mod error;
 mod response;
-mod size;
 
 pub use block::Block;
 pub use chunk::Chunk;

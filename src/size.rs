@@ -185,3 +185,33 @@ impl From<Size> for Size2D {
         }
     }
 }
+
+pub struct Iter {
+    size: Size,
+    index: usize,
+}
+
+impl Iterator for Iter {
+    type Item = Coordinate;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index >= self.size.volume() {
+            return None;
+        }
+        let coordinate = self.size.index_to_offset(self.index);
+        self.index += 1;
+        Some(coordinate)
+    }
+}
+
+impl IntoIterator for Size {
+    type IntoIter = Iter;
+    type Item = Coordinate;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Iter {
+            size: self,
+            index: 0,
+        }
+    }
+}
