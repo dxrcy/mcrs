@@ -40,6 +40,22 @@ impl Heights {
     pub const fn size(&self) -> Size2D {
         self.size
     }
+
+    // TODO(doc)
+    pub fn min(&self) -> i32 {
+        self.into_iter()
+            .map(|item| item.height())
+            .min()
+            .expect("height map should not be empty")
+    }
+
+    // TODO(doc)
+    pub fn max(&self) -> i32 {
+        self.into_iter()
+            .map(|item| item.height())
+            .max()
+            .expect("height map should not be empty")
+    }
 }
 
 pub struct HeightsStream<'a> {
