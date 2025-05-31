@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, ops};
 
 use crate::{Coordinate, Coordinate2D};
 
@@ -66,6 +66,11 @@ impl Size {
     pub fn volume(&self) -> usize {
         self.x as usize * self.y as usize * self.z as usize
     }
+
+    // TODO(doc)
+    pub fn flat(&self) -> Size2D {
+        self.clone().into()
+    }
 }
 
 impl Size2D {
@@ -111,6 +116,64 @@ impl fmt::Debug for Size {
 impl fmt::Debug for Size2D {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}x{}", self.x, self.z)
+    }
+}
+
+impl ops::Div<u32> for Size {
+    type Output = Self;
+
+    fn div(self, rhs: u32) -> Self::Output {
+        Self {
+            x: self.x / rhs,
+            y: self.y / rhs,
+            z: self.z / rhs,
+        }
+    }
+}
+
+impl ops::Div<u32> for Size2D {
+    type Output = Self;
+
+    fn div(self, rhs: u32) -> Self::Output {
+        Self {
+            x: self.x / rhs,
+            z: self.z / rhs,
+        }
+    }
+}
+
+impl From<[u32; 3]> for Size {
+    fn from(value: [u32; 3]) -> Self {
+        Self {
+            x: value[0],
+            y: value[1],
+            z: value[2],
+        }
+    }
+}
+impl From<[u32; 2]> for Size2D {
+    fn from(value: [u32; 2]) -> Self {
+        Self {
+            x: value[0],
+            z: value[1],
+        }
+    }
+}
+impl From<(u32, u32, u32)> for Size {
+    fn from(value: (u32, u32, u32)) -> Self {
+        Self {
+            x: value.0,
+            y: value.1,
+            z: value.2,
+        }
+    }
+}
+impl From<(u32, u32)> for Size2D {
+    fn from(value: (u32, u32)) -> Self {
+        Self {
+            x: value.0,
+            z: value.1,
+        }
     }
 }
 

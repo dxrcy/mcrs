@@ -152,43 +152,57 @@ where
     }
 }
 
-impl From<[i32; 3]> for Coordinate {
-    fn from(value: [i32; 3]) -> Self {
+impl ops::Add<Size2D> for Coordinate {
+    type Output = Self;
+
+    fn add(self, rhs: Size2D) -> Self::Output {
         Self {
-            x: value[0],
-            y: value[1],
-            z: value[2],
-        }
-    }
-}
-impl From<[i32; 2]> for Coordinate2D {
-    fn from(value: [i32; 2]) -> Self {
-        Self {
-            x: value[0],
-            z: value[1],
-        }
-    }
-}
-impl From<(i32, i32, i32)> for Coordinate {
-    fn from(value: (i32, i32, i32)) -> Self {
-        Self {
-            x: value.0,
-            y: value.1,
-            z: value.2,
-        }
-    }
-}
-impl From<(i32, i32)> for Coordinate2D {
-    fn from(value: (i32, i32)) -> Self {
-        Self {
-            x: value.0,
-            z: value.1,
+            x: self.x + rhs.x as i32,
+            y: self.y,
+            z: self.z + rhs.z as i32,
         }
     }
 }
 
-impl From<Size> for Coordinate {
-    fn from(size: Size) -> Self {
+impl ops::Sub<Size2D> for Coordinate {
+    type Output = Self;
+
+    fn sub(self, rhs: Size2D) -> Self::Output {
+        Self {
+            x: self.x - rhs.x as i32,
+            y: self.y,
+            z: self.z - rhs.z as i32,
+        }
+    }
+}
+
+impl From<[i32; 3]> for Coordinate {
+    fn from([x, y, z]: [i32; 3]) -> Self {
+        Self { x, y, z }
+    }
+}
+impl From<[i32; 2]> for Coordinate2D {
+    fn from([x, z]: [i32; 2]) -> Self {
+        Self { x, z }
+    }
+}
+impl From<(i32, i32, i32)> for Coordinate {
+    fn from((x, y, z): (i32, i32, i32)) -> Self {
+        Self { x, y, z }
+    }
+}
+impl From<(i32, i32)> for Coordinate2D {
+    fn from((x, z): (i32, i32)) -> Self {
+        Self { x, z }
+    }
+}
+
+impl<T> From<T> for Coordinate
+where
+    T: Into<Size>,
+{
+    fn from(value: T) -> Self {
+        let size = value.into();
         Self {
             x: size.x as i32,
             y: size.y as i32,
@@ -196,8 +210,12 @@ impl From<Size> for Coordinate {
         }
     }
 }
-impl From<Size2D> for Coordinate2D {
-    fn from(size: Size2D) -> Self {
+impl<T> From<T> for Coordinate2D
+where
+    T: Into<Size2D>,
+{
+    fn from(value: T) -> Self {
+        let size = value.into();
         Self {
             x: size.x as i32,
             z: size.z as i32,

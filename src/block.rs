@@ -36,6 +36,12 @@ impl fmt::Display for Block {
     }
 }
 
+impl From<(u32, u32)> for Block {
+    fn from((id, modifier): (u32, u32)) -> Self {
+        Self { id, modifier }
+    }
+}
+
 macro_rules! blocks {
     ( $( $name:ident = ($id:expr, $modifier:expr); )* ) => {
         impl Block {
