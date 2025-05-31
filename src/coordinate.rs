@@ -44,6 +44,15 @@ impl Coordinate {
     pub fn flat(&self) -> Coordinate2D {
         self.clone().into()
     }
+
+    // TODO(doc)
+    pub const fn replace_height(self, height: i32) -> Coordinate {
+        Coordinate {
+            x: self.x,
+            y: height,
+            z: self.z,
+        }
+    }
 }
 
 impl Coordinate2D {
