@@ -41,6 +41,31 @@ impl Chunk {
     pub const fn size(&self) -> Size {
         self.size
     }
+
+    // TODO(doc)
+    fn empty(origin: impl Into<Coordinate>, size: impl Into<Size>) -> Self {
+        let origin = origin.into();
+        let size = size.into();
+        Self {
+            list: Vec::with_capacity(size.volume()),
+            origin,
+            size,
+        }
+    }
+
+    // TODO(doc)
+    pub fn from_block(
+        block: impl Into<Block>,
+        origin: impl Into<Coordinate>,
+        size: impl Into<Size>,
+    ) -> Self {
+        let block = block.into();
+        let mut chunk = Self::empty(origin, size);
+        for _ in 0..chunk.list.capacity() {
+            chunk.list.push(block);
+        }
+        chunk
+    }
 }
 
 impl<'a> IntoIterator for &'a Chunk {
@@ -106,15 +131,11 @@ impl<'a> ChunkStream<'a> {
 
     pub fn collect(mut self) -> Result<Chunk, Error> {
         assert!(self.index == 0, "cannot collect partially-consumed stream");
-        let mut list = Vec::with_capacity(self.size().volume());
+        let mut chunk = Chunk::empty(self.origin, self.size);
         while let Some(item) = self.next()? {
-            list.push(item.block);
+            chunk.list.push(item.block);
         }
-        Ok(Chunk {
-            list,
-            origin: self.origin,
-            size: self.size,
-        })
+        Ok(chunk)
     }
 
     /// Get the origin [`Coordinate`].
