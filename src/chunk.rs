@@ -27,9 +27,37 @@ impl Chunk {
         Some(self.list[index])
     }
 
+    /// Set the [`Block`] at the **offset** [`Coordinate`].
+    pub fn set_offset(
+        &mut self,
+        coordinate: impl Into<Coordinate>,
+        block: impl Into<Block>,
+    ) -> bool {
+        let coordinate = coordinate.into();
+        if !self.size.contains(coordinate) {
+            return false;
+        }
+        let index = self.size.offset_to_index(coordinate);
+        assert!(
+            index < self.list.len(),
+            "calculated index should be less than internal list length"
+        );
+        self.list[index] = block.into();
+        true
+    }
+
     /// Get the [`Block`] at the **worldspace** [`Coordinate`]
     pub fn get_worldspace(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
         self.get_offset(coordinate.into() - self.origin)
+    }
+
+    /// Set the [`Block`] at the **worldspace** [`Coordinate`]
+    pub fn set_worldspace(
+        &mut self,
+        coordinate: impl Into<Coordinate>,
+        block: impl Into<Block>,
+    ) -> bool {
+        self.set_offset(coordinate.into() - self.origin, block)
     }
 
     /// Get the origin [`Coordinate`].
