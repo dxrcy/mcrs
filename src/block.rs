@@ -1,7 +1,7 @@
 use std::fmt;
 
 /// A Minecraft block, including `id` and `modifier`.
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Block {
     // Fields must be larger than `u8` to hold newer blocks
     /// Block identifier. Eg. 'Andesite' has id `1` (`1:5`).

@@ -3,7 +3,7 @@ use std::{fmt, ops};
 use crate::{Size, Size2D};
 
 /// A worldspace or offset coordinate in the Minecraft world
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Coordinate {
     pub x: i32,
     pub y: i32,
@@ -11,7 +11,7 @@ pub struct Coordinate {
 }
 
 /// A worldspace or offset coordinate in the Minecraft world, with no y-value
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Coordinate2D {
     pub x: i32,
     pub z: i32,

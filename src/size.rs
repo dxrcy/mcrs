@@ -7,7 +7,7 @@ use crate::{Coordinate, Coordinate2D};
 /// Used by [`Chunk`].
 ///
 /// [`Chunk`]: crate::Chunk
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Size {
     pub x: u32,
     pub y: u32,
@@ -19,7 +19,7 @@ pub struct Size {
 /// Used by [`Heights`].
 ///
 /// [`Heights`]: crate::Heights
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Size2D {
     pub x: u32,
     pub z: u32,
