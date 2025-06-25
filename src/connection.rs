@@ -154,12 +154,16 @@ impl Connection {
     }
 
     /// Sets block at [`Coordinate`] to specified [`Block`].
-    pub fn set_block(&mut self, location: impl Into<Coordinate>, block: Block) -> Result<()> {
+    pub fn set_block(
+        &mut self,
+        location: impl Into<Coordinate>,
+        block: impl Into<Block>,
+    ) -> Result<()> {
         self.send(
             "world.setBlock",
             [
                 Argument::Coordinate(location.into()),
-                Argument::Block(block),
+                Argument::Block(block.into()),
             ],
         )
     }
@@ -182,14 +186,14 @@ impl Connection {
         &mut self,
         corner_a: impl Into<Coordinate>,
         corner_b: impl Into<Coordinate>,
-        block: Block,
+        block: impl Into<Block>,
     ) -> Result<()> {
         self.send(
             "world.setBlocks",
             [
                 Argument::Coordinate(corner_a.into()),
                 Argument::Coordinate(corner_b.into()),
-                Argument::Block(block),
+                Argument::Block(block.into()),
             ],
         )
     }
