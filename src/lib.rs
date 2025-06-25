@@ -23,6 +23,7 @@ mod coordinate2d;
 mod error;
 mod response;
 mod size;
+mod size2d;
 
 pub use block::Block;
 pub use chunk::Chunk;
@@ -31,6 +32,7 @@ pub use coordinate::Coordinate;
 pub use coordinate2d::Coordinate2D;
 pub use error::Error;
 pub use heights::Heights;
-pub use size::{Size, Size2D};
+pub use size::Size;
+pub use size2d::Size2D;
 
 type Result<T> = std::result::Result<T, Error>;

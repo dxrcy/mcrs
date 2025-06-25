@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, fmt};
+use std::cmp::Ordering;
 
 use crate::{response::ResponseStream, Coordinate2D, Error, Size2D};
 
