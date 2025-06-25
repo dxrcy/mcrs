@@ -115,15 +115,25 @@ impl Size2D {
     }
 }
 
-impl fmt::Debug for Size {
+impl fmt::Display for Size {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}x{}x{}", self.x, self.y, self.z)
     }
 }
+impl fmt::Debug for Size {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Size({}, {}, {})", self.x, self.y, self.z)
+    }
+}
 
-impl fmt::Debug for Size2D {
+impl fmt::Display for Size2D {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}x{}", self.x, self.z)
+    }
+}
+impl fmt::Debug for Size2D {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Size2D({}, {})", self.x, self.z)
     }
 }
 

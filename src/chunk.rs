@@ -1,11 +1,9 @@
-use std::fmt;
-
 use crate::response::ResponseStream;
 use crate::{Block, Coordinate, Error, Size};
 
 /// Stores a 3D cuboid of [`Block`]s while preserving their location relative to
 /// the base point they were gathered.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Chunk {
     list: Vec<Block>,
     origin: Coordinate,
@@ -54,6 +52,7 @@ impl<'a> IntoIterator for &'a Chunk {
     }
 }
 
+#[derive(Debug)]
 pub struct ChunkStream<'a> {
     response: ResponseStream<'a>,
     index: usize,
@@ -61,6 +60,7 @@ pub struct ChunkStream<'a> {
     size: Size,
 }
 
+#[derive(Debug)]
 pub struct ChunkStreamItem<'a> {
     chunk: &'a ChunkStream<'a>,
     index: usize,
@@ -149,6 +149,7 @@ impl ChunkStreamItem<'_> {
 /// An iterator over the blocks in a [`Chunk`].
 ///
 /// Holds a shared reference to the original [`Chunk`].
+#[derive(Debug)]
 pub struct Iter<'a> {
     chunk: &'a Chunk,
     index: usize,
@@ -157,6 +158,7 @@ pub struct Iter<'a> {
 /// An iterated item in a [`Chunk`].
 ///
 /// Holds a reference to the original [`Chunk`].
+#[derive(Debug)]
 pub struct IterItem<'a> {
     chunk: &'a Chunk,
     index: usize,
@@ -202,31 +204,5 @@ impl<'a> IterItem<'a> {
     /// Get the **worldspace** [`Coordinate`] corresponding to the [`Chunk`] item.
     pub fn position_worldspace(&self) -> Coordinate {
         self.position_offset() + self.chunk.origin
-    }
-}
-
-impl fmt::Debug for Chunk {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<Chunk {:?}>", self.size)
-    }
-}
-impl fmt::Debug for ChunkStreamItem<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "<Chunk stream item {:?} {:?}>",
-            self.position_offset(),
-            self.block(),
-        )
-    }
-}
-impl fmt::Debug for IterItem<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "<Chunk item {:?} {:?}>",
-            self.position_offset(),
-            self.block(),
-        )
     }
 }

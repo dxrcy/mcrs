@@ -4,7 +4,7 @@ use crate::{response::ResponseStream, Coordinate2D, Error, Size2D};
 
 /// Stores a 2D area of the world with the `y`-values of the highest solid block
 /// in each column (`x`, `z` coordinate).
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Heights {
     list: Vec<i32>,
     origin: Coordinate2D,
@@ -58,6 +58,7 @@ impl Heights {
     }
 }
 
+#[derive(Debug)]
 pub struct HeightsStream<'a> {
     response: ResponseStream<'a>,
     index: usize,
@@ -65,6 +66,7 @@ pub struct HeightsStream<'a> {
     size: Size2D,
 }
 
+#[derive(Debug)]
 pub struct HeightsStreamItem<'a> {
     chunk: &'a HeightsStream<'a>,
     index: usize,
@@ -164,6 +166,7 @@ impl<'a> IntoIterator for &'a Heights {
 /// An iterator over the height values in a [`Heights`].
 ///
 /// Holds a shared reference to the original [`Heights`].
+#[derive(Debug)]
 pub struct Iter<'a> {
     heights: &'a Heights,
     index: usize,
@@ -172,6 +175,7 @@ pub struct Iter<'a> {
 /// An iterated item in a [`Heights`].
 ///
 /// Holds a shared reference to the original [`Heights`].
+#[derive(Debug)]
 pub struct IterItem<'a> {
     heights: &'a Heights,
     index: usize,
@@ -243,26 +247,5 @@ impl Ord for IterItem<'_> {
             return Ordering::Greater;
         }
         Ordering::Equal
-    }
-}
-
-impl fmt::Debug for Heights {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<Heights {:?}>", self.size)
-    }
-}
-impl fmt::Debug for HeightsStream<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<Heights stream {:?}>", self.size)
-    }
-}
-impl fmt::Debug for IterItem<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "<Heights item {} {}>",
-            self.position_offset(),
-            self.height(),
-        )
     }
 }

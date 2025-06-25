@@ -45,7 +45,7 @@ impl fmt::Display for Coordinate2D {
 }
 impl fmt::Debug for Coordinate2D {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({}, {})", self.x, self.z)
+        write!(f, "Coordinate2D({}, {})", self.x, self.z)
     }
 }
 
