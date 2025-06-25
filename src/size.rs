@@ -105,6 +105,14 @@ impl Size2D {
     pub fn area(&self) -> usize {
         self.x as usize * self.z as usize
     }
+
+    pub const fn with_height(self, height: u32) -> Size {
+        Size {
+            x: self.x,
+            y: height,
+            z: self.z,
+        }
+    }
 }
 
 impl fmt::Debug for Size {
