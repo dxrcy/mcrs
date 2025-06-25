@@ -166,6 +166,29 @@ where
     }
 }
 
+impl ops::Add<Coordinate2D> for Coordinate {
+    type Output = Self;
+
+    fn add(self, rhs: Coordinate2D) -> Self::Output {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+impl ops::Sub<Coordinate2D> for Coordinate {
+    type Output = Self;
+
+    fn sub(self, rhs: Coordinate2D) -> Self::Output {
+        Self {
+            x: self.x - rhs.x,
+            y: self.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
 impl ops::Add<Size2D> for Coordinate {
     type Output = Self;
 
