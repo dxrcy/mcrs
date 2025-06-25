@@ -119,6 +119,97 @@ impl fmt::Debug for Size2D {
     }
 }
 
+impl<T> ops::Add<T> for Size
+where
+    T: Into<Self>,
+{
+    type Output = Self;
+
+    fn add(self, rhs: T) -> Self::Output {
+        let rhs = rhs.into();
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+impl<T> ops::Sub<T> for Size
+where
+    T: Into<Self>,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: T) -> Self::Output {
+        let rhs = rhs.into();
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
+impl<T> ops::Add<T> for Size2D
+where
+    T: Into<Self>,
+{
+    type Output = Self;
+
+    fn add(self, rhs: T) -> Self::Output {
+        let rhs = rhs.into();
+        Self {
+            x: self.x + rhs.x,
+            z: self.z + rhs.z,
+        }
+    }
+}
+impl<T> ops::Sub<T> for Size2D
+where
+    T: Into<Self>,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: T) -> Self::Output {
+        let rhs = rhs.into();
+        Self {
+            x: self.x - rhs.x,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
+impl<T> ops::Mul<T> for Size
+where
+    T: Into<Self>,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        let rhs = rhs.into();
+        Self {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
+        }
+    }
+}
+
+impl<T> ops::Mul<T> for Size2D
+where
+    T: Into<Self>,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        let rhs = rhs.into();
+        Self {
+            x: self.x * rhs.x,
+            z: self.z * rhs.z,
+        }
+    }
+}
+
 impl ops::Div<u32> for Size {
     type Output = Self;
 
