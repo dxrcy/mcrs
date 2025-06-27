@@ -34,7 +34,7 @@ impl fmt::Display for Block {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}:{}", self.id, self.modifier)?;
         if let Some(name) = self.get_name() {
-            write!(f, "{}:{} ({})", self.id, self.modifier, name)?
+            write!(f, " ({})", name)?
         }
         Ok(())
     }
