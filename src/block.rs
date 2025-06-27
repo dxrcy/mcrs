@@ -15,6 +15,13 @@ impl Block {
     pub const fn new(id: u32, modifier: u32) -> Self {
         Self { id, modifier }
     }
+
+    pub const fn with_modifier(self, modifier: u32) -> Self {
+        Self {
+            id: self.id,
+            modifier,
+        }
+    }
 }
 
 impl fmt::Debug for Block {
