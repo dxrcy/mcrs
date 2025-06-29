@@ -118,6 +118,16 @@ where
     }
 }
 
+impl ops::Mul<u32> for Size2D {
+    type Output = Self;
+
+    fn mul(self, rhs: u32) -> Self::Output {
+        Self {
+            x: self.x * rhs,
+            z: self.z * rhs,
+        }
+    }
+}
 impl ops::Div<u32> for Size2D {
     type Output = Self;
 

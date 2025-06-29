@@ -120,6 +120,17 @@ where
     }
 }
 
+impl ops::Mul<u32> for Size {
+    type Output = Self;
+
+    fn mul(self, rhs: u32) -> Self::Output {
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
+    }
+}
 impl ops::Div<u32> for Size {
     type Output = Self;
 
