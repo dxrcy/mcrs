@@ -53,6 +53,14 @@ impl Size2D {
             z: self.z,
         }
     }
+
+    pub const fn flip_if(self, condition: bool) -> Self {
+        if condition {
+            Self::new(self.z, self.x)
+        } else {
+            self
+        }
+    }
 }
 
 impl fmt::Display for Size2D {
