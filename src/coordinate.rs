@@ -33,6 +33,14 @@ impl Coordinate {
         }
     }
 
+    pub const fn magnitude(self) -> Size {
+        Size {
+            x: self.x.abs() as u32,
+            y: self.y.abs() as u32,
+            z: self.z.abs() as u32,
+        }
+    }
+
     // TODO(doc)
     pub fn flat(&self) -> Coordinate2D {
         self.clone().into()

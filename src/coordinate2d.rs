@@ -29,6 +29,13 @@ impl Coordinate2D {
         }
     }
 
+    pub const fn magnitude(self) -> Size2D {
+        Size2D {
+            x: self.x.abs() as u32,
+            z: self.z.abs() as u32,
+        }
+    }
+
     pub const fn with_height(self, height: i32) -> Coordinate {
         Coordinate {
             x: self.x,
