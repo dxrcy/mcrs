@@ -1,4 +1,4 @@
-use std::fmt;
+use std::fmt::{self, Write as _};
 
 use crate::{Block, Coordinate, Coordinate2D};
 
@@ -23,8 +23,26 @@ impl fmt::Display for Argument<'_> {
                 write!(f, "{},{}", block.id, block.modifier)?;
             }
             Self::Format(arguments) => {
-                // TODO(fix!): Sanitize
-                write!(f, "{}", arguments)?;
+                Sanitizer { inner: f }.write_fmt(*arguments)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+struct Sanitizer<W> {
+    inner: W,
+}
+impl<W> fmt::Write for Sanitizer<W>
+where
+    W: fmt::Write,
+{
+    fn write_str(&mut self, string: &str) -> fmt::Result {
+        for ch in string.chars() {
+            match ch {
+                '\n' => write!(self.inner, " ")?,
+                '\t' | '\x20'..='\x7e' => write!(self.inner, "{}", ch)?,
+                _ => (),
             }
         }
         Ok(())
