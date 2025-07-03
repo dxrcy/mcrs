@@ -1,3 +1,4 @@
+use std::fmt;
 use std::io::{self, Write};
 
 use crate::argument::Argument;
@@ -99,8 +100,8 @@ impl Connection {
     /// Sends a message to the in-game chat.
     ///
     /// Does **not** require that a player has joined.
-    pub fn post_to_chat(&mut self, message: impl AsRef<str>) -> Result<()> {
-        self.send("chat.post", [Argument::String(message.as_ref())])
+    pub fn post_to_chat(&mut self, message: impl fmt::Display) -> Result<()> {
+        self.send("chat.post", [Argument::Format(format_args!("{}", message))])
     }
 
     /// Performs an in-game Minecraft command.
@@ -108,8 +109,11 @@ impl Connection {
     /// Players have to exist on the server and should be server operators (default with [ELCI]).
     ///
     /// [ELCI]: https://github.com/rozukke/elci
-    pub fn do_command(&mut self, command: impl AsRef<str>) -> Result<()> {
-        self.send("player.doCommand", [Argument::String(command.as_ref())])
+    pub fn do_command(&mut self, command: impl fmt::Display) -> Result<()> {
+        self.send(
+            "player.doCommand",
+            [Argument::Format(format_args!("{}", command))],
+        )
     }
 
     /// Returns a [`Coordinate`] representing player position (block position of lower half of

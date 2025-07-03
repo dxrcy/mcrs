@@ -7,7 +7,7 @@ pub enum Argument<'a> {
     Coordinate(Coordinate),
     Coordinate2D(Coordinate2D),
     Block(Block),
-    String(&'a str),
+    Format(fmt::Arguments<'a>),
 }
 
 impl fmt::Display for Argument<'_> {
@@ -22,14 +22,9 @@ impl fmt::Display for Argument<'_> {
             Self::Block(block) => {
                 write!(f, "{},{}", block.id, block.modifier)?;
             }
-            Self::String(string) => {
-                for ch in string.chars() {
-                    match ch {
-                        '\n' => write!(f, " ")?,
-                        '\t' | '\x20'..='\x7e' => write!(f, "{}", ch)?,
-                        _ => (),
-                    }
-                }
+            Self::Format(arguments) => {
+                // TODO(fix!): Sanitize
+                write!(f, "{}", arguments)?;
             }
         }
         Ok(())
