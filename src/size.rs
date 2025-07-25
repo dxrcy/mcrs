@@ -20,7 +20,7 @@ impl Size {
     }
 
     /// Returns `true` if the **offset** [`Coordinate`] is within the size.
-    pub fn contains(&self, coordinate: impl Into<Coordinate>) -> bool {
+    pub fn contains(self, coordinate: impl Into<Coordinate>) -> bool {
         let coordinate = coordinate.into();
         (0..self.x as i32).contains(&coordinate.x)
             && (0..self.y as i32).contains(&coordinate.y)
@@ -30,7 +30,7 @@ impl Size {
     /// Convert a [`Chunk`] index to an **offset** [`Coordinate`].
     ///
     /// [`Chunk`]: crate::Chunk
-    pub const fn index_to_offset(&self, index: usize) -> Coordinate {
+    pub const fn index_to_offset(self, index: usize) -> Coordinate {
         let z = (index % self.z as usize) as i32;
         let xy = index / self.z as usize;
         let x = (xy % self.x as usize) as i32;
@@ -41,7 +41,7 @@ impl Size {
     /// Convert an **offset** [`Coordinate`] to a [`Chunk`] index.
     ///
     /// [`Chunk`]: crate::Chunk
-    pub fn offset_to_index(&self, coordinate: impl Into<Coordinate>) -> usize {
+    pub fn offset_to_index(self, coordinate: impl Into<Coordinate>) -> usize {
         let coordinate = coordinate.into();
         let [x, y, z] = [
             coordinate.x as usize,
@@ -52,13 +52,13 @@ impl Size {
     }
 
     /// Returns the amount of blocks in the cuboid volume.
-    pub fn volume(&self) -> usize {
+    pub fn volume(self) -> usize {
         self.x as usize * self.y as usize * self.z as usize
     }
 
     // TODO(doc)
-    pub fn flat(&self) -> Size2D {
-        self.clone().into()
+    pub fn flat(self) -> Size2D {
+        self.into()
     }
 }
 

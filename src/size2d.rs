@@ -27,7 +27,7 @@ impl Size2D {
     /// Convert a [`Heights`] index to an **offset** [`Coordinate2D`].
     ///
     /// [`Heights`]: crate::Heights
-    pub const fn index_to_offset(&self, index: usize) -> Coordinate2D {
+    pub const fn index_to_offset(self, index: usize) -> Coordinate2D {
         let z = (index % self.z as usize) as i32;
         let x = (index / self.z as usize) as i32;
         Coordinate2D { x, z }
@@ -36,13 +36,13 @@ impl Size2D {
     /// Convert an **offset** [`Coordinate2D`] to a [`Heights`] index.
     ///
     /// [`Heights`]: crate::Heights
-    pub fn offset_to_index(&self, coordinate: impl Into<Coordinate2D>) -> usize {
+    pub fn offset_to_index(self, coordinate: impl Into<Coordinate2D>) -> usize {
         let coordinate = coordinate.into();
         coordinate.z as usize + coordinate.x as usize * self.z as usize
     }
 
     // Returns the amount of blocks in the flat area.
-    pub fn area(&self) -> usize {
+    pub fn area(self) -> usize {
         self.x as usize * self.z as usize
     }
 

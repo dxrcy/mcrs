@@ -31,8 +31,8 @@ impl Coordinate2D {
 
     pub const fn magnitude(self) -> Size2D {
         Size2D {
-            x: self.x.abs() as u32,
-            z: self.z.abs() as u32,
+            x: self.x.unsigned_abs(),
+            z: self.z.unsigned_abs(),
         }
     }
 

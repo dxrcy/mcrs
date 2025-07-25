@@ -35,15 +35,15 @@ impl Coordinate {
 
     pub const fn magnitude(self) -> Size {
         Size {
-            x: self.x.abs() as u32,
-            y: self.y.abs() as u32,
-            z: self.z.abs() as u32,
+            x: self.x.unsigned_abs(),
+            y: self.y.unsigned_abs(),
+            z: self.z.unsigned_abs(),
         }
     }
 
     // TODO(doc)
-    pub fn flat(&self) -> Coordinate2D {
-        self.clone().into()
+    pub fn flat(self) -> Coordinate2D {
+        self.into()
     }
 
     // TODO(doc)

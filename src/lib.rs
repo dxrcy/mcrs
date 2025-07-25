@@ -1,3 +1,5 @@
+#![allow(clippy::uninlined_format_args)]
+
 //! **mcrs**: A Rust interface for a Minecraft server.
 //!
 //! Based on [mcpp](https://github.com/rozukke/mcpp).

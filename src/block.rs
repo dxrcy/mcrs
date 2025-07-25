@@ -52,7 +52,7 @@ macro_rules! blocks {
             /// Get the non-standard name for the block.
             ///
             /// Always corresponds to names of block constants, like `Block::ANDESITE`.
-            pub const fn get_name(&self) -> Option<&'static str> {
+            pub const fn get_name(self) -> Option<&'static str> {
                 match (self.id, self.modifier) {
                     $( ($id, $modifier) => Some(stringify!($name)), )*
                     _ => None,
