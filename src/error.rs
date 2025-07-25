@@ -23,6 +23,9 @@ pub enum IntegerError {
     Overflow,
 }
 
+#[derive(Debug)]
+pub struct OutOfBoundsError;
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -47,6 +50,12 @@ impl fmt::Display for IntegerError {
             Self::Overflow => write!(f, "Value would overflow")?,
         }
         Ok(())
+    }
+}
+
+impl fmt::Display for OutOfBoundsError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Position out of bounds")
     }
 }
 

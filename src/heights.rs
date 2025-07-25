@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
 
-use crate::{response::ResponseStream, Coordinate2D, Error, Size2D};
+use crate::error::OutOfBoundsError;
+use crate::response::ResponseStream;
+use crate::{Coordinate2D, Error, Size2D};
 
 /// Stores a 2D area of the world with the `y`-values of the highest solid block
 /// in each column (`x`, `z` coordinate).
@@ -13,21 +15,24 @@ pub struct Heights {
 
 impl Heights {
     /// Get the height value at the **offset** [`Coordinate2D`].
-    pub fn get_offset(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
+    pub fn get_offset(&self, coordinate: impl Into<Coordinate2D>) -> Result<i32, OutOfBoundsError> {
         let coordinate = coordinate.into();
         if !self.size.contains(coordinate) {
-            return None;
+            return Err(OutOfBoundsError);
         }
         let index = self.size.offset_to_index(coordinate);
         assert!(
             index < self.list.len(),
             "calculated index should be less than internal list length"
         );
-        Some(self.list[index])
+        Ok(self.list[index])
     }
 
     /// Get the height value at the **worldspace** [`Coordinate2D`].
-    pub fn get_worldspace(&self, coordinate: impl Into<Coordinate2D>) -> Option<i32> {
+    pub fn get_worldspace(
+        &self,
+        coordinate: impl Into<Coordinate2D>,
+    ) -> Result<i32, OutOfBoundsError> {
         self.get_offset(coordinate.into() - self.origin)
     }
 

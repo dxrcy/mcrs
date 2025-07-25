@@ -1,3 +1,4 @@
+use crate::error::OutOfBoundsError;
 use crate::response::ResponseStream;
 use crate::{Block, Coordinate, Error, Size};
 
@@ -12,21 +13,24 @@ pub struct Chunk {
 
 impl Chunk {
     /// Get the [`Block`] at the **offset** [`Coordinate`].
-    pub fn get_offset(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
+    pub fn get_offset(&self, coordinate: impl Into<Coordinate>) -> Result<Block, OutOfBoundsError> {
         let coordinate = coordinate.into();
         if !self.size.contains(coordinate) {
-            return None;
+            return Err(OutOfBoundsError);
         }
         let index = self.size.offset_to_index(coordinate);
         assert!(
             index < self.list.len(),
             "calculated index should be less than internal list length"
         );
-        Some(self.list[index])
+        Ok(self.list[index])
     }
 
     /// Get the [`Block`] at the **worldspace** [`Coordinate`]
-    pub fn get_worldspace(&self, coordinate: impl Into<Coordinate>) -> Option<Block> {
+    pub fn get_worldspace(
+        &self,
+        coordinate: impl Into<Coordinate>,
+    ) -> Result<Block, OutOfBoundsError> {
         self.get_offset(coordinate.into() - self.origin)
     }
 
