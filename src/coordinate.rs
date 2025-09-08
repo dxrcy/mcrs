@@ -17,7 +17,8 @@ impl Coordinate {
     }
 
     // TODO(rename): Possibly a misleading method name?
-    pub fn min(self, other: Self) -> Self {
+    pub fn min(self, other: impl Into<Self>) -> Self {
+        let other = other.into();
         Self {
             x: self.x.min(other.x),
             y: self.y.min(other.y),
@@ -25,7 +26,8 @@ impl Coordinate {
         }
     }
 
-    pub const fn size_between(self, other: Self) -> Size {
+    pub fn size_between(self, other: impl Into<Self>) -> Size {
+        let other = other.into();
         Size {
             x: (self.x - other.x).unsigned_abs() + 1,
             y: (self.y - other.y).unsigned_abs() + 1,
