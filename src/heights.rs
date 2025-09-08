@@ -96,7 +96,7 @@ impl<'a> HeightsStream<'a> {
 
     // Cannot be an iterator, due to lifetime problems
     #[allow(clippy::should_implement_trait)]
-    pub fn next(&mut self) -> Result<Option<HeightsStreamItem>, Error> {
+    pub fn next(&mut self) -> Result<Option<HeightsStreamItem<'_>>, Error> {
         if self.is_at_end() {
             return Ok(None);
         }

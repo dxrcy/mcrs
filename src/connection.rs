@@ -93,7 +93,7 @@ impl Connection {
     }
 
     /// Creates a [`ResponseStream`] to read from the server.
-    fn recv(&mut self) -> Result<ResponseStream> {
+    fn recv(&mut self) -> Result<ResponseStream<'_>> {
         ResponseStream::new(&mut self.reader)
     }
 
@@ -229,7 +229,7 @@ impl Connection {
         &mut self,
         corner_a: impl Into<Coordinate>,
         corner_b: impl Into<Coordinate>,
-    ) -> Result<ChunkStream> {
+    ) -> Result<ChunkStream<'_>> {
         let corner_a = corner_a.into();
         let corner_b = corner_b.into();
         self.send(
@@ -269,7 +269,7 @@ impl Connection {
         &mut self,
         corner_a: impl Into<Coordinate2D>,
         corner_b: impl Into<Coordinate2D>,
-    ) -> Result<HeightsStream> {
+    ) -> Result<HeightsStream<'_>> {
         let corner_a = corner_a.into();
         let corner_b = corner_b.into();
         self.send(

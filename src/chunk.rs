@@ -89,7 +89,7 @@ impl<'a> ChunkStream<'a> {
 
     // Cannot be an iterator, due to lifetime problems
     #[allow(clippy::should_implement_trait)]
-    pub fn next(&mut self) -> Result<Option<ChunkStreamItem>, Error> {
+    pub fn next(&mut self) -> Result<Option<ChunkStreamItem<'_>>, Error> {
         if self.is_at_end() {
             return Ok(None);
         }
