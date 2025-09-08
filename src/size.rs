@@ -143,6 +143,30 @@ impl ops::Div<u32> for Size {
     }
 }
 
+impl ops::Add<Size2D> for Size {
+    type Output = Self;
+
+    fn add(self, rhs: Size2D) -> Self::Output {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+
+impl ops::Sub<Size2D> for Size {
+    type Output = Self;
+
+    fn sub(self, rhs: Size2D) -> Self::Output {
+        Self {
+            x: self.x - rhs.x,
+            y: self.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
 impl From<[u32; 3]> for Size {
     fn from(value: [u32; 3]) -> Self {
         Self {
