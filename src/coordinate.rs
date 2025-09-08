@@ -47,7 +47,7 @@ impl Coordinate {
     }
 
     // TODO(doc)
-    pub const fn replace_height(self, height: i32) -> Coordinate {
+    pub const fn with_height(self, height: i32) -> Coordinate {
         Coordinate {
             x: self.x,
             y: height,
