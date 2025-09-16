@@ -1,6 +1,6 @@
 [package]
 name = "mcrs"
-version = "0.4.1"
+version = "0.4.2"
 edition = "2021"
 description = "Interface with a local Minecraft server"
 authors = ["darcy"]
