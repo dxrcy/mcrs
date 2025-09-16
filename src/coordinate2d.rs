@@ -15,10 +15,19 @@ impl Coordinate2D {
         Self { x, z }
     }
 
+    // TODO(rename): Possibly a misleading method name?
     pub fn min(self, other: Self) -> Self {
         Self {
             x: self.x.min(other.x),
             z: self.z.min(other.z),
+        }
+    }
+
+    // TODO(rename): Possibly a misleading method name?
+    pub fn max(self, other: Self) -> Self {
+        Self {
+            x: self.x.max(other.x),
+            z: self.z.max(other.z),
         }
     }
 

@@ -26,6 +26,16 @@ impl Coordinate {
         }
     }
 
+    // TODO(rename): Possibly a misleading method name?
+    pub fn max(self, other: impl Into<Self>) -> Self {
+        let other = other.into();
+        Self {
+            x: self.x.max(other.x),
+            y: self.y.max(other.y),
+            z: self.z.max(other.z),
+        }
+    }
+
     pub fn size_between(self, other: impl Into<Self>) -> Size {
         let other = other.into();
         Size {
