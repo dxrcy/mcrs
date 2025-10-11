@@ -64,6 +64,12 @@ macro_rules! blocks {
                 pub const $name: Self = Self::new($id, $modifier);
             )*
         }
+
+        pub const BLOCKS: [(&'static str, Block); 442] = [
+            $(
+                ( stringify!($name), Block { id: $id, modifier: $modifier } ),
+            )*
+        ];
     };
 }
 

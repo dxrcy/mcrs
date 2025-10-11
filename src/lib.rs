@@ -27,7 +27,7 @@ mod response;
 mod size;
 mod size2d;
 
-pub use block::Block;
+pub use block::{Block, BLOCKS};
 pub use chunk::Chunk;
 pub use connection::Connection;
 pub use coordinate::Coordinate;
