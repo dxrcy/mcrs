@@ -6,6 +6,7 @@ use crate::{Block, Coordinate, Error, Size};
 /// the base point they were gathered.
 #[derive(Clone, Debug)]
 pub struct Chunk {
+    // TODO: Use `Box<[Block]>`
     list: Vec<Block>,
     origin: Coordinate,
     size: Size,

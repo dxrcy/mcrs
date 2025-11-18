@@ -28,6 +28,8 @@ pub struct Connection {
 // TODO(feat): Add context to errors?
 // TODO(doc): Rewrite documentation for functionality methods
 
+// PERF: Buffer writer LMAO
+
 impl Connection {
     /// Default address and port for [ELCI] server.
     ///
